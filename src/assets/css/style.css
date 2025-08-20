@@ -1,0 +1,60 @@
+/*----------------HEADER-----------------------*/
+header {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    padding: 1rem 3rem;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+header .logo img {
+    height: 60px;
+    width: auto;
+}
+
+
+header .menu {
+    display: flex;
+    align-items: center;
+    gap: 4rem; /*gap avec le bouton et la liste de li*/
+    
+}
+
+header nav ul {
+    display: flex;
+    list-style: none;
+    gap: 4rem; /*gap entre les li*/
+}
+
+header nav ul li a {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    color : #212121;
+}
+
+header nav ul li a:hover {
+    color: #4CAF50;
+}
+
+header .menu button {
+    background-color: #4CAF50;
+    border: none;
+    padding: 1rem 3rem;
+    border-radius: 25px;
+    cursor: pointer;
+}
+header .menu button a {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    color : #212121;
+}
+header .menu button:hover {
+    background-color: #43a047; /* vert un peu plus foncé au hover */
+}
+
+/*---------------------------------------*/

@@ -7,13 +7,14 @@
     <div class="menu">
         <nav>
             <ul>
-                <li><a href="../index.php"> Accueil </a></li>
-                <li><a href="../recherche.php"> Covoiturage </li>
+                <li><a href="../index.php">Accueil</a></li>
+                <li><a href="../recherche.php">Covoiturage</a></li>
                 <li><a href="../contact">Contact</a></li>
             </ul>
         </nav>
 
-        <button><a href="../connexion.php">Compte</a></button>
+        <button><a href="../connexion.php">Mon Compte</a></button>
+
     </div>
 
 </header>
