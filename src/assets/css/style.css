@@ -6,6 +6,8 @@ header {
     padding: 1rem 3rem;
     background-color: #f9f9f9;
     border-bottom: 1px solid #e5e5e5;
+    position: fixed;
+    left:0; top:0; width: 100%;
 }
 
 header .logo img {
