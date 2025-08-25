@@ -1,3 +1,11 @@
+/*----------------BODY-----------------------*/
+body {
+    margin:0; padding:0;
+    padding-top: 100px; /*obligé car contenue qui se chevauche en dessous du header*/
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+}
 /*----------------HEADER-----------------------*/
 header {
     display: flex;
@@ -10,62 +18,224 @@ header {
     position: fixed;
     width: 100%;
     top:0; left:0;
-   
+    z-index: 2;
 }
-
 header .logo img {
     height: 80px;
     width: auto;
 }
-
-
 header .menu {
     display: flex;
     align-items: center;
     gap: 4rem; /*gap avec le bouton et la liste de li*/
     
 }
-
 header nav ul {
     display: flex;
     list-style: none;
     gap: 4rem; /*gap entre les li*/
 }
-
 header nav ul li a {
-    font-family: 'Poppins', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
     text-decoration: none;
     color : #212121;
 }
-
 header nav ul li a:hover {
     color: #4CAF50;
 }
-
-header .menu button {
+header .menu .bouton_connexion {
     background-color: #4CAF50;
     border: none;
     padding: 0.6rem 1.5rem;
     border-radius: 25px;
     cursor: pointer;
-}
-header .menu button a {
     font-family: 'Poppins', sans-serif;
     font-size: 16px;
     font-weight: 600;
     text-decoration: none;
     color : #212121;
 }
-header .menu button:hover {
+header .menu .bouton_connexion:hover {
     background-color: #43a047; /* vert un peu plus foncé au hover */
 }
+/*----------------HERO-----------------------*/
+.hero {
+    position: relative;
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: url("../img/hero_fond.jpg") center/cover no-repeat; /* image en fond */
+}
+.hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color:#ffffff;
+}
+.hero_recherche {
+    position: relative;
+    z-index: 1;
+    padding: 2rem;
+    border-radius: 25px;
+    color: #ffffff;
+}
+.hero_recherche nav ul {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+    justify-content: center;
+    padding: 0;
+    margin: 2rem 0;
+    background: rgba(255, 255, 255, 0.5);
 
-/*----------------BODY-----------------------*/
-
-body {
-    padding-top: 80px; /*obligé car contenue qui se chevauche en dessous du header*/
+}
+.hero_recherche nav ul li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color:#212121;
+}
+.hero_recherche nav ul li img {
+    height: 24px;
+    width: auto;
+}
+.hero_recherche button {
+    background-color: #4CAF50;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    cursor: pointer;
+}
+.hero_recherche .bouton_recherche {
+    text-decoration: none;
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+}
+.hero_recherche .bouton_recherche:hover {
+    background-color: #43a047;
+}
+/*----------------SECTION INFORMATION-----------------------*/
+.information {
+    display: flex;
+    flex-direction: column;
+    padding: 5rem 10%;
+    background-color: #eaf2ed; /* couleur claire type fond vert pâle */
+    gap: 4rem;
+}
+.info_entreprise, .info_objectif{
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+}
+/* Info entreprise */
+.info_entreprise {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    flex-wrap: wrap; /* pour que ça passe en mobile */
 }
 
-/*---------------------------------------*/
+.info_entreprise img {
+    width: 45%;
+    max-width: 500px;
+    border-radius: 15px;
+    object-fit: cover;
+}
+
+.txt_qui_sommes_nous {
+    width: 50%;
+    min-width: 280px;
+    border: 2px solid #4CAF50;
+    padding: 2rem;
+    border-radius: 15px;
+    background-color: #ffffff; /* texte sur fond blanc */
+}
+
+.txt_qui_sommes_nous h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #212121;
+}
+
+.txt_qui_sommes_nous p {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.6;
+    color: #212121;
+}
+
+/* Info objectif */
+.info_objectif {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    flex-wrap: wrap-reverse; /* image à droite, texte à gauche en desktop */
+}
+
+.txt_obj {
+    width: 50%;
+    min-width: 280px;
+    border: 2px solid #4CAF50;
+    padding: 2rem;
+    border-radius: 15px;
+    background-color: #ffffff; /* texte sur fond blanc */
+}
+
+.txt_obj h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #212121;
+}
+
+.txt_obj p {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.6;
+    color: #212121;
+}
+
+.info_objectif img {
+    width: 45%;
+    max-width: 500px;
+    border-radius: 15px;
+    object-fit: cover;
+}
+
+/*----------------RESPONSIVE-----------------------*/
+@media (max-width: 900px) {
+    .info_entreprise, .info_objectif {
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .txt_qui_sommes_nous, .txt_obj, .info_entreprise img, .info_objectif img {
+        width: 100%;
+    }
+}
+
+/*----------------FOOTER-----------------------*/
+footer {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    padding: 1rem 3rem;
+    background-color: #212121;
+    box-sizing: border-box;
+    width: 100%;
+}
+footer .liens_footer {
+    display: flex;
+    flex-direction: column;
+    gap:2rem;
+}
+footer .liens_footer a {
+    text-decoration: none;
+    color :#ffffff;
+}
+footer .logo img {
+    height: 80px;
+    width: auto;
+}

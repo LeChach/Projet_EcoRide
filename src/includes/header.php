@@ -13,7 +13,7 @@
             </ul>
         </nav>
 
-        <button><a href="../connexion.php">Mon Compte</a></button>
+        <button class="bouton_connexion">Mon Compte</button>
 
     </div>
 
