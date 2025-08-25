@@ -6,12 +6,15 @@ header {
     padding: 1rem 3rem;
     background-color: #f9f9f9;
     border-bottom: 1px solid #e5e5e5;
+    box-sizing: border-box;
     position: fixed;
-    left:0; top:0; width: 100%;
+    width: 100%;
+    top:0; left:0;
+   
 }
 
 header .logo img {
-    height: 60px;
+    height: 80px;
     width: auto;
 }
 
@@ -44,7 +47,7 @@ header nav ul li a:hover {
 header .menu button {
     background-color: #4CAF50;
     border: none;
-    padding: 1rem 3rem;
+    padding: 0.6rem 1.5rem;
     border-radius: 25px;
     cursor: pointer;
 }
@@ -57,6 +60,12 @@ header .menu button a {
 }
 header .menu button:hover {
     background-color: #43a047; /* vert un peu plus foncé au hover */
+}
+
+/*----------------BODY-----------------------*/
+
+body {
+    padding-top: 80px; /*obligé car contenue qui se chevauche en dessous du header*/
 }
 
 /*---------------------------------------*/
