@@ -60,6 +60,33 @@
         </div>
     </section>
     
+    <section class="avantages">
+        <h2>Pourquoi choisir Éco Ride</h2>
+        <div class="trois_avantages">
+            <div class="ecologie">
+                <img src="assets/icons/ecologie.png" alt="icone écologie">
+                <h3>Écologie</h3>
+                <p>
+                    Réduisez votre empreinte carbone
+                </p>
+            </div>
+            <div class="economie">
+                <img src="assets/icons/economie.png" alt="icone économie">
+                <h3>Économie</h3>
+                <p>
+                    Réduisez Réduisez vos frais de transport
+                </p>
+            </div>
+            <div class="communautaire">
+                <img src="assets/icons/communautaire.png" alt="icone social">
+                <h3>Communautaire</h3>
+                <p>
+                    Rencontrez et partagez avec d’autres voyageurs                
+                </p>
+            </div>
+        </div>
+    </section>
+
     <?php include 'includes/footer.php' ?>
 </body>
 </html>

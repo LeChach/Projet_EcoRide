@@ -216,6 +216,77 @@ header .menu .bouton_connexion:hover {
     }
 }
 
+/*------------------AVANTAGE------------------------*/
+.avantages {
+    background-color: #f5f5f5; /* Fond gris clair */
+    padding: 80px 40px;
+    text-align: center;
+}
+.avantages h2 {
+    font-size: 2.5rem;
+    color: #333;
+    margin-bottom: 60px;
+    font-weight: 600;
+}
+/* Conteneur des 3 avantages */
+.trois_avantages {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 40px;
+}
+/* Style de chaque avantage */
+.ecologie,
+.economie,
+.communautaire {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+    max-width: 300px;
+}
+/* Images des icônes */
+.ecologie img,
+.economie img,
+.communautaire img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+    object-fit: contain;
+}
+/* Titres h3 */
+.ecologie h3,
+.economie h3,
+.communautaire h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+/* Paragraphes descriptifs */
+.ecologie p,
+.economie p,
+.communautaire p {
+    font-size: 1rem;
+    color: #666;
+    line-height: 1.5;
+    max-width: 250px;
+}
+/* Responsive */
+@media (max-width: 768px) {
+    .trois_avantages {
+        flex-direction: column;
+        gap: 50px;
+    }
+    
+    .avantages h2 {
+        font-size: 2rem;
+    }
+}
+
 /*----------------FOOTER-----------------------*/
 footer {
     display: flex;
