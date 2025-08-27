@@ -16,7 +16,7 @@
     <main>
         <section class="connexion">
             <h1>Connexion</h1>
-            <form action="donnees_connexion.php" method="POST">
+            <form action="login.php" method="POST">
                 <label for="pseudo">Pseudo :</label>
                 <input type="text" id="pseudo" name="pseudo" required>
 

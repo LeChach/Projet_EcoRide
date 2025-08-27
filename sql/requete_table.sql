@@ -34,18 +34,17 @@ CREATE TABLE voiture(
     energie ENUM('essence','diesel','hybride','electrique') NOT NULL,
     couleur ENUM('Noir','Blanc','Gris foncé','Gris','Bordeaux','Rouge','Bleu foncé','Bleu','Vert Foncé','Vert','Marron','Beige','Orange','Jaune','Violet','Rose') NOT NULL,
     nb_place INT NOT NULL,
-    preference ENUM('fumeur','animaux','climatisation')BOOLEAN NOT NULL,
     id_conducteur INT NOT NULL,
     FOREIGN KEY (id_conducteur) REFERENCES utilisateur (id_utilisateur)
 );
 
 CREATE TABLE preference (
-    id voiture INT PRIMARY KEY AUTO_INCREMENT
+    id_voiture INT PRIMARY KEY AUTO_INCREMENT,
     fumeur BOOLEAN NOT NULL,
     animaux BOOLEAN NOT NULL,
     climatisation BOOLEAN NOT NULL,
     FOREIGN KEY (id_voiture) REFERENCES voiture (id_voiture)
-)
+);
 
 
 CREATE TABLE convoiturage (
@@ -112,7 +111,7 @@ CREATE TABLE validation_trajet (
     trajet_valide BOOLEAN NOT NULL,
     probleme BOOLEAN DEFAULT FALSE,
     commentaire_probleme TEXT,
-    date_validatation DATETIME DEFAULT CURRENT_TIMESTAMP,
+    date_validation DATETIME DEFAULT CURRENT_TIMESTAMP,
     id_conducteur INT NOT NULL,
     id_passager INT NOT NULL,
     id_convoiturage INT NOT NULL,
