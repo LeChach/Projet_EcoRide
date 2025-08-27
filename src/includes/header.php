@@ -7,14 +7,16 @@
     <div class="menu">
         <nav>
             <ul>
-                <li><a href="../index.php">Accueil</a></li>
-                <li><a href="../recherche.php">Covoiturage</a></li>
-                <li><a href="../contact">Contact</a></li>
+                <li id="accueil">Accueil</li>
+                <li id="recherche_covoit">Covoiturage</li>
+                <li id="contact">Contact</li>
             </ul>
         </nav>
 
-        <button class="bouton_connexion">Mon Compte</button>
+        <button class="bouton_connexion" id="bouton_connexion">Mon Compte</button>
 
     </div>
 
 </header>
+
+<script src="assets/js/scripts_header.js"></script>

@@ -35,12 +35,12 @@ header nav ul {
     list-style: none;
     gap: 4rem; /*gap entre les li*/
 }
-header nav ul li a {
-    text-decoration: none;
+header nav ul li {
     color : #212121;
 }
-header nav ul li a:hover {
+header nav ul li:hover {
     color: #4CAF50;
+    cursor:pointer;
 }
 header .menu .bouton_connexion {
     background-color: #4CAF50;

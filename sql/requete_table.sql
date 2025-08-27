@@ -39,6 +39,14 @@ CREATE TABLE voiture(
     FOREIGN KEY (id_conducteur) REFERENCES utilisateur (id_utilisateur)
 );
 
+CREATE TABLE preference (
+    id voiture INT PRIMARY KEY AUTO_INCREMENT
+    fumeur BOOLEAN NOT NULL,
+    animaux BOOLEAN NOT NULL,
+    climatisation BOOLEAN NOT NULL,
+    FOREIGN KEY (id_voiture) REFERENCES voiture (id_voiture)
+)
+
 
 CREATE TABLE convoiturage (
     id_convoiturage INT PRIMARY KEY AUTO_INCREMENT,
