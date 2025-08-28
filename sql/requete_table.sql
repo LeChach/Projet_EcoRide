@@ -7,7 +7,7 @@ CREATE TABLE utilisateur (
     photo VARCHAR(255) DEFAULT 'lien_vers_logo_avatar',
     credit DECIMAL(7,2) DEFAULT 20,
     date_inscription DATE DEFAULT CURRENT_DATE,
-    type_utilisateur ENUM('passager','chauffeur','les deux') NOT NULL,
+    type_utilisateur ENUM('passager','chauffeur','les_deux') NOT NULL,
     statut ENUM('actif','suspendu') DEFAULT 'actif'
 );
 

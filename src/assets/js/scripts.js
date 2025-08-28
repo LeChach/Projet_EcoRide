@@ -16,3 +16,7 @@ document.getElementById("contact").addEventListener("click", ()=>{
 document.getElementById("bouton_connexion").addEventListener("click", ()=>{
     window.location.href = "connexion.php";
 });
+/*------------gère l'inscription--------------------------------*/ 
+document.getElementById("bouton_inscription").addEventListener("click", ()=>{
+    window.location.href = "inscription.php";
+});

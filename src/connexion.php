@@ -1,3 +1,16 @@
+<?php
+session_start();
+if(isset($_SESSION['user_id'])){
+    header('Location: mon_compte.php');
+    exit;
+}
+
+$erreur = $_SESSION['erreur_login'] ?? null;
+unset($_SESSION['erreur_login']);
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="fr-FR">
 <head>
@@ -16,7 +29,7 @@
     <main>
         <section class="connexion">
             <h1>Connexion</h1>
-            <form action="login.php" method="POST">
+            <form action="connexion/se_connecter.php" method="POST">
                 <label for="pseudo">Pseudo :</label>
                 <input type="text" id="pseudo" name="pseudo" required>
 
@@ -26,8 +39,20 @@
                 <button type="submit">Se Connecter</button>
             </form>
         </section>
+
+        <div class="div_inscription">
+            <p>Vous n'avez pas de compte ?</p>
+            <button id="bouton_inscription" type="button">S'inscrire</button>
+        </div>
     </main>
 
+    <?php if ($erreur): ?>
+        <p style="color:red;"><?= htmlspecialchars($erreur) ?></p>
+    <?php endif; ?>
+
     <?php include 'includes/footer.php' ?>
+
+    <script src="assets/js/scripts.js" defer></script>
+
 </body>
 </html>

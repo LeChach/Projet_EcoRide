@@ -13,10 +13,10 @@
             </ul>
         </nav>
 
-        <button class="bouton_connexion" id="bouton_connexion">Mon Compte</button>
+        <button class="bouton_connexion" id="bouton_connexion" type="button"> Compte</button>
 
     </div>
 
 </header>
 
-<script src="assets/js/scripts_header.js"></script>
+<script src="assets/js/scripts.js"></script>

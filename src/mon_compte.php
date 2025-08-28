@@ -1,3 +1,24 @@
+<?php
+session_start();
+require_once 'connexion/log.php';
+if(!isset($_SESSION['user_id'])){
+    header('Location: connexion.php');
+    exit;
+}
+
+//recup des info pour un affichage perso
+$user_id = $_SESSION['user_id'];
+try {
+    $prep = $pdo->prepare("SELECT pseudo FROM utilisateur WHERE id_utilisateur = ?");
+    $prep->execute([$user_id]);
+    $pseudo = $prep->fetch();
+} catch (PDOException $e) {
+    die("Erreur de BBD : ".$e->getMessage());
+}
+
+
+?>
+
 <!DOCTYPE html>
 <html lang="fr-FR">
 <head>
@@ -13,7 +34,16 @@
 <body>
     <?php include 'includes/header.php' ?>
 
-    VOTRE COMTPE
+    <main>
+        <div>
+            <h1>Bienvenue <?= htmlspecialchars($pseudo['pseudo'])?>!</h1>
+
+            <form action="connexion/deconnexion.php">
+                <button type="submit">se déconnecter</button>
+            </form>
+        </div>
+
+    </main>
 
     <?php include 'includes/footer.php' ?>
 </body>
