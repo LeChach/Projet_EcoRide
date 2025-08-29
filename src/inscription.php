@@ -41,10 +41,10 @@ unset($_SESSION['erreur_inscription']);
                     <input type="radio" name="type_utilisateur" value="passager" required>
                     <label for="covoiture">Covoituré (je cherche des trajets)</label><br>
                     
-                    <input type="radio" name="type_utilisateur" value="chauffeur" required>
+                    <input type="radio" name="type_utilisateur" value="conducteur" required>
                     <label for="covoitureur">Covoitureur (je propose des trajets)</label><br>
 
-                    <input type="radio" name="type_utilisateur" value="les_deux" required>
+                    <input type="radio" name="type_utilisateur" value="passager et conducteur" required>
                     <label for="les_deux">les deux (je cherche et je propose des trajets)</label><br>
 
                 </fieldset>

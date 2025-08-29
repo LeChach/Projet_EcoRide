@@ -7,7 +7,7 @@ CREATE TABLE utilisateur (
     photo VARCHAR(255) DEFAULT 'lien_vers_logo_avatar',
     credit DECIMAL(7,2) DEFAULT 20,
     date_inscription DATE DEFAULT CURRENT_DATE,
-    type_utilisateur ENUM('passager','chauffeur','les_deux') NOT NULL,
+    type_utilisateur ENUM('passager','conducteur','passager et conducteur') NOT NULL,
     statut ENUM('actif','suspendu') DEFAULT 'actif'
 );
 
@@ -39,11 +39,11 @@ CREATE TABLE voiture(
 );
 
 CREATE TABLE preference (
-    id_voiture INT PRIMARY KEY AUTO_INCREMENT,
+    id_utilisateur INT PRIMARY KEY AUTO_INCREMENT,
     fumeur BOOLEAN NOT NULL,
     animaux BOOLEAN NOT NULL,
     climatisation BOOLEAN NOT NULL,
-    FOREIGN KEY (id_voiture) REFERENCES voiture (id_voiture)
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur (id_utilisateur)
 );
 
 

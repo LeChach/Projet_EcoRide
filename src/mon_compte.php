@@ -1,22 +1,5 @@
-<?php
-session_start();
-require_once 'connexion/log.php';
-if(!isset($_SESSION['user_id'])){
-    header('Location: connexion.php');
-    exit;
-}
-
-//recup des info pour un affichage perso
-$user_id = $_SESSION['user_id'];
-try {
-    $prep = $pdo->prepare("SELECT pseudo FROM utilisateur WHERE id_utilisateur = ?");
-    $prep->execute([$user_id]);
-    $pseudo = $prep->fetch();
-} catch (PDOException $e) {
-    die("Erreur de BBD : ".$e->getMessage());
-}
-
-
+<?php 
+require_once 'connexion/recup_donnee.php';
 ?>
 
 <!DOCTYPE html>
@@ -36,11 +19,28 @@ try {
 
     <main>
         <div>
-            <h1>Bienvenue <?= htmlspecialchars($pseudo['pseudo'])?>!</h1>
+            <h1>Bienvenue <?= htmlspecialchars($pseudo)?>!</h1>
+
+            <img src="<?= htmlspecialchars($photo)?>" alt="avatar profil">
+
+            <div class="info">
+                <p>
+                    Email :<?= htmlspecialchars($email)?>
+                    Téléphone :<?= htmlspecialchars($telephone)?>
+                    Solde du crédit :<?= htmlspecialchars($credit)?>
+                    Vous êtes : <?= htmlspecialchars($type_u)?>
+                </p>
+
+
+            </div>
 
             <form action="connexion/deconnexion.php">
                 <button type="submit">se déconnecter</button>
             </form>
+
+            </div>
+        </div>
+
         </div>
 
     </main>

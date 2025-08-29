@@ -7,13 +7,13 @@
     <div class="menu">
         <nav>
             <ul>
-                <li id="accueil">Accueil</li>
+                <li><a href="index.php">Accueil</a></li>
                 <li id="recherche_covoit">Covoiturage</li>
                 <li id="contact">Contact</li>
             </ul>
         </nav>
 
-        <button class="bouton_connexion" id="bouton_connexion" type="button"> Compte</button>
+        <a href="connexion.php" class="bouton_connexion">Mon Compte</a>
 
     </div>
 

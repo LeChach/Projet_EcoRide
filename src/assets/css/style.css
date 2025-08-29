@@ -42,7 +42,7 @@ header nav ul li:hover {
     color: #4CAF50;
     cursor:pointer;
 }
-header .menu .bouton_connexion {
+.bouton_connexion {
     background-color: #4CAF50;
     border: none;
     padding: 0.6rem 1.5rem;
@@ -54,7 +54,7 @@ header .menu .bouton_connexion {
     text-decoration: none;
     color : #212121;
 }
-header .menu .bouton_connexion:hover {
+.bouton_connexion:hover {
     background-color: #43a047; /* vert un peu plus foncé au hover */
 }
 /*----------------HERO-----------------------*/

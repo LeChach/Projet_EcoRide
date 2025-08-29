@@ -42,7 +42,7 @@ unset($_SESSION['erreur_login']);
 
         <div class="div_inscription">
             <p>Vous n'avez pas de compte ?</p>
-            <button id="bouton_inscription" type="button">S'inscrire</button>
+            <a href="inscription.php" class="bouton_inscription">S'inscrire</a>
         </div>
     </main>
 

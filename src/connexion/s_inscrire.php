@@ -10,7 +10,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
     //permet de verifier l'enum 
     $type_u = $_POST['type_utilisateur'];
-    $valeur_type_u = ['passager','chauffeur','les_deux'];
+    $valeur_type_u = ['passager','chauffeur','passager et conducteur'];
     if (!in_array($type_u, $valeur_type_u)) {
         $_SESSION['erreur_inscription'] = "Type d'utilisateur invalide !";
         header("Location: ../inscription.php");
