@@ -1,15 +1,7 @@
 <?php
-session_start();
-if(isset($_SESSION['user_id'])){
-    header('Location: mon_compte.php');
-    exit;
-}
-
-$erreur = $_SESSION['erreur_login'] ?? null;
-unset($_SESSION['erreur_login']);
+require_once 'connexion/log.php';
+require_once 'connexion/session.php';
 ?>
-
-
 
 <!DOCTYPE html>
 <html lang="fr-FR">
@@ -46,8 +38,8 @@ unset($_SESSION['erreur_login']);
         </div>
     </main>
 
-    <?php if ($erreur): ?>
-        <p style="color:red;"><?= htmlspecialchars($erreur) ?></p>
+    <?php if ($erreur_log): ?>
+        <p style="color:red;"><?= htmlspecialchars($erreur_log) ?></p>
     <?php endif; ?>
 
     <?php include 'includes/footer.php' ?>

@@ -1,4 +1,6 @@
-<?php 
+<?php
+require_once 'connexion/log.php';
+require_once 'connexion/session.php';
 require_once 'connexion/recup_donnee.php';
 ?>
 
@@ -33,12 +35,15 @@ require_once 'connexion/recup_donnee.php';
 
 
             </div>
-
-            <form action="connexion/deconnexion.php">
-                <button type="submit">se déconnecter</button>
-            </form>
-
+                <form action="connexion/deconnexion.php">
+                    <button type="submit">se déconnecter</button>
+                </form>
             </div>
+
+            <div id="preference">
+                <a href="preference.php">Mes Préférences</a>
+            </div>
+
         </div>
 
         </div>

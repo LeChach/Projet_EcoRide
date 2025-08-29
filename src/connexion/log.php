@@ -1,6 +1,6 @@
 <?php 
 //fichier de creation de pdo pour connexion securise a la bdd
-
+session_start();
 $host = "localhost";
 $db_name = "bdd_eco-ride";
 $username = "root";

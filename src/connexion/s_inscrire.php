@@ -1,6 +1,5 @@
 <?php 
 require_once 'log.php';
-session_start();
 
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $pseudo = trim($_POST['pseudo']);

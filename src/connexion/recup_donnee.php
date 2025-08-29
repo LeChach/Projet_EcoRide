@@ -1,16 +1,9 @@
 <?php
-session_start();
-require_once 'connexion/log.php';
-if(!isset($_SESSION['user_id'])){
-    header('Location: connexion.php');
-    exit;
-}
-
-//recup des info pour un affichage perso
-$user_id = $_SESSION['user_id'];
+require_once 'log.php';
+require_once 'session.php';
 try {
 
-    //prep pour la table user
+    //prep pour la table Utilisateur
     $prep = $pdo->prepare("SELECT * FROM utilisateur WHERE id_utilisateur = ?");
     $prep->execute([$user_id]);
     $user_info = $prep->fetch();
@@ -27,6 +20,5 @@ try {
 } catch (PDOException $e) {
     die("Erreur de BBD : ".$e->getMessage());
 }
-
 
 ?>

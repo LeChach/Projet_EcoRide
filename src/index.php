@@ -1,8 +1,7 @@
 <?php
-session_start();
-$user_id = $_SESSION['user_id'] ?? null;
+require_once 'connexion/log.php';
+require_once 'connexion/session.php';
 ?>
-
 
 <!DOCTYPE html>
 <html lang="fr-FR">

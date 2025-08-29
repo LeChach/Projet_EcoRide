@@ -1,7 +1,6 @@
 <?php
-session_start();
-$erreur = $_SESSION['erreur_inscription'] ?? null;
-unset($_SESSION['erreur_inscription']);
+require_once 'connexion/log.php';
+require_once 'connexion/session.php';
 ?>
 
 <!DOCTYPE html>
@@ -56,8 +55,8 @@ unset($_SESSION['erreur_inscription']);
     </main>
 
 
-    <?php if ($erreur): ?>
-        <p style="color:red;"><?= htmlspecialchars($erreur) ?></p>
+    <?php if ($erreur_inscription): ?>
+        <p style="color:red;"><?= htmlspecialchars($erreur_inscription) ?></p>
     <?php endif; ?>
     
 
