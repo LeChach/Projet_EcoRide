@@ -1,6 +1,10 @@
 <?php 
 require_once 'log.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $pseudo = trim($_POST['pseudo']);
     $mot_de_passe = $_POST['password'];

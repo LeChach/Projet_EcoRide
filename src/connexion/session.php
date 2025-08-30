@@ -1,13 +1,12 @@
 <?php
 
-//verif de la session active
-if(!isset($_SESSION['user_id'])){
-    header('Location: mon_compte.php');
-    exit;
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
+
 //permet de recup l'id de l'utilisateur connecté
-$user_id = $_SESSION['user_id'];
+$user_id = $_SESSION['user_id'] ?? null;
 
 //gère les erreurs
 //de log
@@ -17,4 +16,5 @@ unset($_SESSION['erreur_login']);
 //d'inscription
 $erreur_inscription = $_SESSION['erreur_inscription'] ?? null;
 unset($_SESSION['erreur_inscription']);
+
 ?>

@@ -1,6 +1,10 @@
 <?php
 require_once 'log.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 if($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $pseudo = htmlspecialchars($_POST['pseudo'], ENT_QUOTES, 'UTF-8'); //converti automatiquement en full caractere
