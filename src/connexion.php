@@ -22,8 +22,9 @@ require_once 'connexion/session.php';
         <section class="connexion">
             <h1>Connexion</h1>
             <form action="connexion/se_connecter.php" method="POST">
-                <label for="pseudo">Pseudo :</label>
-                <input type="text" id="pseudo" name="pseudo" required>
+                
+                <label for="identifiant">Pseudo ou Email :</label>
+                <input type="text" id="identifiant" name="identifiant" required>
 
                 <label for="password">Mot de Passe :</label>
                 <input type="password" id="password" name="password" required>
