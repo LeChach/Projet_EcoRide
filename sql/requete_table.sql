@@ -3,19 +3,19 @@ CREATE TABLE utilisateur (
     pseudo VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(50)  NOT NULL UNIQUE,
     mot_de_passe VARCHAR(255) NOT NULL,
-    sexe ENUM('homme','femme','non précisé') DEFAULT 'non précisé',
+    sexe ENUM('Homme','Femme','Non précisé') NOT NULL,
     telephone VARCHAR(50) NOT NULL,
     photo VARCHAR(255) DEFAULT 'avatar_default.png',
     credit DECIMAL(7,2) DEFAULT 20,
     date_inscription DATE DEFAULT CURRENT_DATE,
-    type_utilisateur ENUM('passager','conducteur','passager et conducteur') NOT NULL,
+    type_utilisateur ENUM('Passager','Conducteur','Passager et Conducteur') NOT NULL,
     statut ENUM('actif','suspendu') DEFAULT 'actif'
 );
 
 
 CREATE TABLE role (
     id_role INT PRIMARY KEY,
-    libelle ENUM('utilisateur','employe','administrateur')
+    libelle ENUM('Utilisateur','Employe','Administrateur')
 );
 
 CREATE TABLE possede (
@@ -26,31 +26,31 @@ CREATE TABLE possede (
     FOREIGN KEY (id_role) REFERENCES role(id_role)
 );
 
+CREATE TABLE preference (
+    id_utilisateur INT PRIMARY KEY,
+    etre_fumeur ENUM('accepter','refuser') DEFAULT 'accepter',
+    avoir_animal ENUM('accepter','refuser') DEFAULT 'accepter',
+    avec_silence ENUM('accepter','refuser') DEFAULT 'refuser',
+    avec_musique ENUM('accepter','refuser') DEFAULT 'accepter',
+    avec_climatisation ENUM('accepter','refuser') DEFAULT 'accepter',
+    avec_velo ENUM('accepter','refuser') DEFAULT 'refuser',
+    place_coffre ENUM('accepter','refuser') DEFAULT 'accepter',
+    ladies_only ENUM('accepter','refuser') DEFAULT 'refuser',
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur (id_utilisateur)
+);
+
 CREATE TABLE voiture(
     id_voiture INT PRIMARY KEY AUTO_INCREMENT,
     marque VARCHAR(50) NOT NULL,
     modele VARCHAR(50) NOT NULL,
     immat VARCHAR(20) NOT NULL UNIQUE,
     date_premiere_immat DATE NOT NULL,
-    energie ENUM('essence','diesel','hybride','electrique') NOT NULL,
+    energie ENUM('Essence','Diesel','Hybride','Electrique') NOT NULL,
     couleur ENUM('Noir','Blanc','Gris foncé','Gris','Bordeaux','Rouge','Bleu foncé','Bleu','Vert Foncé','Vert','Marron','Beige','Orange','Jaune','Violet','Rose') NOT NULL,
     nb_place INT NOT NULL,
     id_conducteur INT NOT NULL,
     FOREIGN KEY (id_conducteur) REFERENCES utilisateur (id_utilisateur)
 );
-
-CREATE TABLE preference (
-    id_utilisateur INT PRIMARY KEY,
-    etre_fumeur ENUM('accepter','refuser'),
-    avoir_animal ENUM('accepter','refuser'),
-    avec_silence ENUM('accepter','refuser'),
-    avec_musique ENUM('accepter','refuser'),
-    climatisation ENUM('accepter','refuser'),
-    avec_velo ENUM('accepter','refuser'),
-    ladies_only ENUM('accepter','refuser'),
-    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur (id_utilisateur)
-);
-
 
 CREATE TABLE convoiturage (
     id_convoiturage INT PRIMARY KEY AUTO_INCREMENT,
@@ -62,7 +62,7 @@ CREATE TABLE convoiturage (
     lieu_arrive VARCHAR(50) NOT NULL,
     nb_place_dispo INT NOT NULL,
     prix_personne DECIMAL(7,2) NOT NULL,
-    statut_convoit ENUM('planifie', 'en_cours', 'termine', 'annule') DEFAULT 'planifie',
+    statut_convoit ENUM('planifier', 'en_cours', 'terminer', 'annuler') DEFAULT 'planifie',
     id_conducteur INT NOT NULL ,
     id_voiture INT NOT NULL,
     FOREIGN KEY (id_conducteur) REFERENCES utilisateur (id_utilisateur),
@@ -74,7 +74,7 @@ CREATE TABLE avis (
     avis_id INT PRIMARY KEY AUTO_INCREMENT,
     commentaire TEXT,
     note INT NOT NULL,
-    statut_avis ENUM('en_attente','refuse','valide') DEFAULT 'en_attente',
+    statut_avis ENUM('en_attente','refuser','valider') DEFAULT 'en_attente',
     date_avis DATETIME DEFAULT CURRENT_TIMESTAMP,
     id_passager INT NOT NULL,
     id_conducteur INT NOT NULL,

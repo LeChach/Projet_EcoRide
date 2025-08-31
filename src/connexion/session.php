@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 
 //permet de recup l'id de l'utilisateur connecté
-$user_id = $_SESSION['user_id'] ?? null;
+$id_utilisateur = $_SESSION['id_utilisateur'] ?? null;
 
 //gère les erreurs
 //de log

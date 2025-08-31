@@ -12,12 +12,12 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         //PREPARATION DE LA REQUETE
-        $pdo_prep = $pdo->prepare("SELECT * from utilisateur WHERE pseudo = ?"); //prepare l'info a mettre a la place de ?
-        $pdo_prep->execute([$pseudo]); //execute en remplacent ? par $pseudo
-        $user = $pdo_prep->fetch();
+        $prep = $pdo->prepare("SELECT id_utilisateur, pseudo FROM utilisateur WHERE pseudo = ?"); //prepare l'info a mettre a la place de ?
+        $prep->execute([$pseudo]); //execute en remplacent ? par $pseudo
+        $info_utilisateur = $prep->fetch();
 
-        if($user && password_verify($mot_de_passe,$user['mot_de_passe'])){
-            $_SESSION['user_id'] = $user['id_utilisateur'];
+        if($info_utilisateur && password_verify($mot_de_passe,PASSWORD_DEFAULT)){
+            $_SESSION['id_utilisateur'] = $info_utilisateur['id_utilisateur'];
             header("Location: ../mon_compte.php");
             exit;
         } else {

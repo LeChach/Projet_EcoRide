@@ -5,16 +5,16 @@ try {
 
     //prep pour la table Utilisateur
     $prep = $pdo->prepare("SELECT * FROM utilisateur WHERE id_utilisateur = ?");
-    $prep->execute([$user_id]);
-    $user_info = $prep->fetch();
+    $prep->execute([$id_utilisateur]);
+    $info_utilisateur = $prep->fetch();
 
-    if($user_info){
-        $pseudo = $user_info['pseudo'];
-        $email = $user_info['email'];
-        $telephone = $user_info['telephone'];
-        $photo = "assets/pp/" . $user_info['photo'];
-        $credit = $user_info['credit'];
-        $type_u = $user_info['type_utilisateur'];
+    if($info_utilisateur){
+        $pseudo =$info_utilisateur['pseudo'];
+        $email = $info_utilisateur['email'];
+        $telephone = $info_utilisateur['telephone'];
+        $photo = "assets/pp/".$info_utilisateur['photo'];
+        $credit = $info_utilisateur['credit'];
+        $type_u = $info_utilisateur['type_utilisateur'];
     }
 
 } catch (PDOException $e) {
