@@ -44,7 +44,5 @@ require_once 'connexion/session.php';
 
     <?php include 'includes/footer.php' ?>
 
-    <script src="assets/js/scripts.js" defer></script>
-
 </body>
 </html>

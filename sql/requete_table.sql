@@ -3,8 +3,9 @@ CREATE TABLE utilisateur (
     pseudo VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(50)  NOT NULL UNIQUE,
     mot_de_passe VARCHAR(255) NOT NULL,
+    sexe ENUM('homme','femme','non précisé') DEFAULT 'non précisé',
     telephone VARCHAR(50) NOT NULL,
-    photo VARCHAR(255) DEFAULT 'lien_vers_logo_avatar',
+    photo VARCHAR(255) DEFAULT 'avatar_default.png',
     credit DECIMAL(7,2) DEFAULT 20,
     date_inscription DATE DEFAULT CURRENT_DATE,
     type_utilisateur ENUM('passager','conducteur','passager et conducteur') NOT NULL,
@@ -13,7 +14,7 @@ CREATE TABLE utilisateur (
 
 
 CREATE TABLE role (
-    id_role INT PRIMARY KEY AUTO_INCREMENT,
+    id_role INT PRIMARY KEY,
     libelle ENUM('utilisateur','employe','administrateur')
 );
 
@@ -39,10 +40,14 @@ CREATE TABLE voiture(
 );
 
 CREATE TABLE preference (
-    id_utilisateur INT PRIMARY KEY AUTO_INCREMENT,
-    fumeur BOOLEAN NOT NULL,
-    animaux BOOLEAN NOT NULL,
-    climatisation BOOLEAN NOT NULL,
+    id_utilisateur INT PRIMARY KEY,
+    etre_fumeur ENUM('accepter','refuser'),
+    avoir_animal ENUM('accepter','refuser'),
+    avec_silence ENUM('accepter','refuser'),
+    avec_musique ENUM('accepter','refuser'),
+    climatisation ENUM('accepter','refuser'),
+    avec_velo ENUM('accepter','refuser'),
+    ladies_only ENUM('accepter','refuser'),
     FOREIGN KEY (id_utilisateur) REFERENCES utilisateur (id_utilisateur)
 );
 

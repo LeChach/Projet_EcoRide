@@ -12,7 +12,7 @@ try {
         $pseudo = $user_info['pseudo'];
         $email = $user_info['email'];
         $telephone = $user_info['telephone'];
-        $photo = "assets/pp/".$user_info['photo'];
+        $photo = "assets/pp/" . $user_info['photo'];
         $credit = $user_info['credit'];
         $type_u = $user_info['type_utilisateur'];
     }

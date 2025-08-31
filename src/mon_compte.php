@@ -32,19 +32,15 @@ require_once 'connexion/recup_donnee.php';
                     Solde du crédit :<?= htmlspecialchars($credit)?>
                     Vous êtes : <?= htmlspecialchars($type_u)?>
                 </p>
-
-
             </div>
-                <form action="connexion/deconnexion.php">
-                    <button type="submit">se déconnecter</button>
-                </form>
-            </div>
+
+            <form action="connexion/deconnexion.php">
+                <button type="submit">se déconnecter</button>
+            </form>
 
             <div id="preference">
                 <a href="preference.php">Mes Préférences</a>
             </div>
-
-        </div>
 
         </div>
 
