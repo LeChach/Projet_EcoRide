@@ -31,7 +31,6 @@ require_once 'connexion/preference.php';
                     Téléphone :<?= htmlspecialchars($telephone)?>
                     Solde du crédit :<?= htmlspecialchars($credit)?>
                     Vous êtes : <?= htmlspecialchars($type_u)?>
-                    vous etes :  <?= htmlspecialchars($pref_ladies_only)?>
                 </p>
             </div>
 
