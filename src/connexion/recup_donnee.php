@@ -1,6 +1,6 @@
 <?php
 require_once 'log.php';
-require_once 'session.php';
+require_once 'session_prive.php';
 try {
 
     //prep pour la table Utilisateur
@@ -9,7 +9,7 @@ try {
     $info_utilisateur = $prep->fetch();
 
     if($info_utilisateur){
-        $pseudo =$info_utilisateur['pseudo'];
+        $pseudo = $info_utilisateur['pseudo'];
         $email = $info_utilisateur['email'];
         $telephone = $info_utilisateur['telephone'];
         $photo = "assets/pp/".$info_utilisateur['photo'];
