@@ -12,6 +12,12 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     $email = trim($_POST['email']);
     $telephone = trim($_POST['phone']);
     $type_u = $_POST['type_utilisateur'];
+    //gestion de la preference ladies_only non null si nouvelle utilisateur = femme
+    if($sexe == 'Femme'){
+        $pref_ladies = 'refuser';
+    }else{
+        $pref_ladies = null;
+    }
 
     //permet de verifier l'enum 
 
@@ -52,10 +58,10 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
         //PREPARATION POUR PREFERENCE
         $prep_preference = $pdo->prepare(
-            "INSERT INTO preference (id_utilisateur)
-            VALUES (?)"
+            "INSERT INTO preference (id_utilisateur,ladies_only)
+            VALUES (?,?)"
         );
-        $prep_preference->execute([$id_utilisateur]);
+        $prep_preference->execute([$id_utilisateur,$pref_ladies]);
 
         //PREPARATION POUR POSSEDE
         $prep_possede = $pdo->prepare(

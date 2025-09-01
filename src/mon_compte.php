@@ -31,6 +31,7 @@ require_once 'connexion/preference.php';
                     Téléphone :<?= htmlspecialchars($telephone)?>
                     Solde du crédit :<?= htmlspecialchars($credit)?>
                     Vous êtes : <?= htmlspecialchars($type_u)?>
+                    vous etes :  <?= htmlspecialchars($pref_ladies_only)?>
                 </p>
             </div>
 
@@ -80,13 +81,14 @@ require_once 'connexion/preference.php';
                     <label for="place_coffre">Place dans le coffre :
                     <input type="checkbox" name="place_coffre" value="accepter" <?php if($pref_coffre === 'accepter') echo 'checked' ?>>
                     </label>
-
-                    <img src="assets/icons/femme.png" alt="logo femme">
-                    <label for="femme">Femme Uniquement :
-                    <input type="checkbox" name="femme" value="accepter" <?php if($pref_ladies_only === 'accepter') echo 'checked' ?>>
-                    </label>
-
-
+                    
+                    <?php if($pref_ladies_only == 'accepter' || $pref_ladies_only == 'refuser'): ?>
+                        <img src="assets/icons/femme.png" alt="logo femme">
+                        <label for="femme">Femme Uniquement :
+                        <input type="checkbox" name="femme" value="accepter" <?php if($pref_ladies_only === 'accepter') echo 'checked' ?>>
+                        </label>
+                    <?php endif ?>
+                        
                     <button type="submit">Valider mes préférences</button>
                     <button id="btn_fermer" type="button">Fermer</button>
                 </form>
