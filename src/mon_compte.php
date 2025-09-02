@@ -43,7 +43,7 @@ require_once 'connexion/preference.php';
             <button id="btn_preference">Mes Préférences</button>
 
             <div id="preference" style="display: none;">
-                <form action="connexion/preference.php" method="POST">
+                <form action="connexion/new_preference.php" method="POST">
 
 
                     <img src="assets/icons/cigarette.png" alt="logo cigarette">
@@ -83,8 +83,8 @@ require_once 'connexion/preference.php';
                     
                     <?php if($pref_ladies_only == 'accepter' || $pref_ladies_only == 'refuser'): ?>
                         <img src="assets/icons/femme.png" alt="logo femme">
-                        <label for="femme">Femme Uniquement :
-                        <input type="checkbox" name="femme" value="accepter" <?php if($pref_ladies_only === 'accepter') echo 'checked' ?>>
+                        <label for="ladies_only">Femme Uniquement :
+                        <input type="checkbox" name="ladies_only" value="accepter" <?php if($pref_ladies_only === 'accepter') echo 'checked' ?>>
                         </label>
                     <?php endif ?>
                         

@@ -1,17 +1,16 @@
 <?php 
 require_once 'log.php';
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once 'session.php';
 
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
-    $sexe = $_POST['sexe'];
-    $pseudo = ($_POST['pseudo']);
-    $mot_de_passe = $_POST['password'];
-    $email = trim($_POST['email']);
-    $telephone = trim($_POST['phone']);
-    $type_u = $_POST['type_utilisateur'];
+    
+    $sexe = $_POST['sexe'] ?? 'Non précisé';
+    $pseudo = ($_POST['pseudo']) ?? '';
+    $mot_de_passe = $_POST['password'] ?? '';
+    $email = trim($_POST['email']) ?? '';
+    $telephone = trim($_POST['phone']) ?? '';
+    $type_u = $_POST['type_utilisateur'] ?? '';
+
     //gestion de la preference ladies_only non null si nouvelle utilisateur = femme
     if($sexe == 'Femme'){
         $pref_ladies = 'refuser';
@@ -23,9 +22,19 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
     try {
         //Verification si mail et pseudo déjà pris        
-        $verif_mail = $pdo->prepare("SELECT id_utilisateur FROM utilisateur WHERE email = ?");
+        $verif_mail = $pdo->prepare(
+            "SELECT id_utilisateur 
+            FROM utilisateur 
+            WHERE email = ?"
+            );
+
         $verif_mail->execute([$email]);
-        $verif_pseudo = $pdo->prepare("SELECT id_utilisateur FROM utilisateur WHERE pseudo = ?");
+        $verif_pseudo = $pdo->prepare(
+            "SELECT id_utilisateur 
+            FROM utilisateur 
+            WHERE pseudo = ?"
+            );
+
         $verif_pseudo->execute([$pseudo]);
  
         if($verif_pseudo->rowCount()>0){
@@ -46,13 +55,12 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         $mot_de_passe_hshd = password_hash($mot_de_passe,PASSWORD_DEFAULT);
 
 
-
-
         //PREPARATION POUR UTILISATEUR
         $prep_utilisateur = $pdo->prepare(
             "INSERT INTO utilisateur (pseudo,email,mot_de_passe,sexe,telephone,type_utilisateur)
             VALUES (?,?,?,?,?,?)"
             );
+
         $prep_utilisateur->execute([$pseudo,$email,$mot_de_passe_hshd,$sexe,$telephone,$type_u]);
         $id_utilisateur = $pdo->lastInsertId();
 
@@ -61,6 +69,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             "INSERT INTO preference (id_utilisateur,ladies_only)
             VALUES (?,?)"
         );
+
         $prep_preference->execute([$id_utilisateur,$pref_ladies]);
 
         //PREPARATION POUR POSSEDE
@@ -68,6 +77,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             "INSERT INTO possede (id_utilisateur,id_role)
             VALUES (?,1)"
         );
+        
         $prep_possede->execute([$id_utilisateur]);
 
         $pdo->commit();
