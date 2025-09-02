@@ -1,9 +1,6 @@
 <?php
 require_once 'log.php';
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once 'session.php';
 
 if($_SERVER['REQUEST_METHOD'] === 'POST') {
 

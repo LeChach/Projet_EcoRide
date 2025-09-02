@@ -2,10 +2,22 @@
 require_once 'log.php';
 require_once 'session_prive.php';
 
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST'){
 
         try{
+
+            //BESOIN DE RECUPERER LE SEXE POUR METTRE A JOUR LES PREF
+            $prep_sexe = $pdo->prepare(
+                "SELECT sexe 
+                FROM utilisateur 
+                WHERE id_utilisateur = ?"
+            );
+            $prep_sexe->execute([$id_utilisateur]);
+            $sexe_utilisateur = $prep_sexe->fetch();
+
             //on recupere les nouvelles infos meme si ca na pas changer
+            //si coché $post = accepter , si decocher $post = null donc refuser 
             $new_pref_fumeur = $_POST['fumeur'] ?? 'refuser';
             $new_pref_animal = $_POST['animaux'] ?? 'refuser';
             $new_pref_silence = $_POST['silence'] ?? 'refuser';
@@ -13,7 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
             $new_pref_clim = $_POST['climatisation'] ?? 'refuser';
             $new_pref_velo = $_POST['velo'] ?? 'refuser';
             $new_pref_coffre = $_POST['place_coffre'] ?? 'refuser';
-            $new_pref_ladies_only = $_POST['ladies_only'];
+            if ($sexe_utilisateur['sexe'] == 'Femme'){
+                $new_pref_ladies_only = $_POST['ladies_only'] ?? 'refuser';
+            }else{
+                $new_pref_ladies_only = 'non concerne';
+            }
 
             //PREPARATION POUR PREFERENCE
             $prep_new_pref = $pdo->prepare(

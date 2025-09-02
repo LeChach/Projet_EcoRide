@@ -15,7 +15,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     if($sexe == 'Femme'){
         $pref_ladies = 'refuser';
     }else{
-        $pref_ladies = null;
+        $pref_ladies = 'non concerne';
     }
 
     //permet de verifier l'enum 

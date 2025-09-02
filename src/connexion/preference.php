@@ -21,7 +21,7 @@ require_once 'session_prive.php';
         $pref_clim = $pref_utilisateur['avec_climatisation'] ?? 'accepter';
         $pref_velo = $pref_utilisateur['avec_velo'] ?? 'refuser';
         $pref_coffre = $pref_utilisateur['place_coffre'] ?? 'accepter';
-        $pref_ladies_only = $pref_utilisateur['ladies_only'] ?? null;
+        $pref_ladies_only = $pref_utilisateur['ladies_only'] ?? 'non concerne';
 
     } catch (PDOException $e) {
         die ("Erreur connexion BDD : ".$e->getMessage());
