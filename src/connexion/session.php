@@ -17,4 +17,6 @@ unset($_SESSION['erreur_login']);
 $erreur_inscription = $_SESSION['erreur_inscription'] ?? null;
 unset($_SESSION['erreur_inscription']);
 
+$erreur_ajout_voiture = $_SESSION['erreur_ajout_voiture'] ?? null;
+unset($_SESSION['erreur_inscription']);
 ?>

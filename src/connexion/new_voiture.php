@@ -14,6 +14,21 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         $couleur = $_POST['couleur'];
         $nb_place = $_POST['nb_place'];
 
+        //VERIFICATION DE LA PLAQUE IMMAT
+        $prep_immat = $pdo->prepare(
+            "SELECT id_voiture
+            FROM voiture
+            WHERE id_utilisateur = ?
+            AND immat = ?"
+        );
+        $prep_immat->execute([$id_utilisateur,$immat]);
+
+        if($prep_immat->rowCount()>0){
+            $_SESSION['erreur_ajout_voiture'] = "Immatricule déjà Existant";
+            header("Location: ../ajouter_voiture.php");
+            exit;
+        }
+
         //PREPARATION POUR AJOUTER VOITURE
         $prep_voiture = $pdo->prepare(
             "INSERT INTO voiture (id_utilisateur,marque,modele,immat,date_premiere_immat,energie,couleur,nb_place)

@@ -89,6 +89,10 @@ require_once 'connexion/session_prive.php';
         <fieldset>
             <legend>Ajouter une nouvelle voiture :</legend>
 
+            <?php if ($erreur_ajout_voiture): ?>
+              <p style="color:red;"><?= $erreur_ajout_voiture ?></p>
+            <?php endif; ?>            
+
             <label for="marque">Marque :</label>
             <input type="text" name="marque" id="marque" required>
 

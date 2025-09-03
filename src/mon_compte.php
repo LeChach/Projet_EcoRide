@@ -119,6 +119,8 @@ require_once 'connexion/voiture.php';
                 <button type="submit">se déconnecter</button>
             </form>
 
+            <?php if($type_u == 'Conducteur' || $type_u == 'Passager et Conducteur'):?>
+
             <button id="btn_preference">Mes Préférences</button>
             <div id="preference" style="display: none;">
                 <form action="connexion/new_preference.php" method="POST">
@@ -200,6 +202,7 @@ require_once 'connexion/voiture.php';
                     <?php endforeach;?> 
             </div>
             <a href="ajouter_voiture.php" id>Ajoutez une voiture</a>
+            <?php endif ?>
 
     </main>
 
