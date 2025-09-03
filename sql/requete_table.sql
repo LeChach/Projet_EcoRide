@@ -41,6 +41,7 @@ CREATE TABLE preference (
 
 CREATE TABLE voiture(
     id_voiture INT PRIMARY KEY AUTO_INCREMENT,
+    id_utilisateur INT NOT NULL,
     marque VARCHAR(50) NOT NULL,
     modele VARCHAR(50) NOT NULL,
     immat VARCHAR(20) NOT NULL UNIQUE,
@@ -48,8 +49,7 @@ CREATE TABLE voiture(
     energie ENUM('Essence','Diesel','Hybride','Electrique') NOT NULL,
     couleur ENUM('Noir','Blanc','Gris foncé','Gris','Bordeaux','Rouge','Bleu foncé','Bleu','Vert Foncé','Vert','Marron','Beige','Orange','Jaune','Violet','Rose') NOT NULL,
     nb_place INT NOT NULL,
-    id_conducteur INT NOT NULL,
-    FOREIGN KEY (id_conducteur) REFERENCES utilisateur (id_utilisateur)
+    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur (id_utilisateur)
 );
 
 CREATE TABLE convoiturage (

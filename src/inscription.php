@@ -56,13 +56,13 @@ require_once 'connexion/session.php';
                     <legend>Vous serez :</legend>
 
                     <input type="radio" name="type_utilisateur" value="Passager" required>
-                    <label for="covoiture">Covoituré (je cherche des trajets)</label><br>
+                    <label for="Passager">Covoituré (je cherche des trajets)</label><br>
                     
                     <input type="radio" name="type_utilisateur" value="Conducteur" required>
-                    <label for="covoitureur">Covoitureur (je propose des trajets)</label><br>
+                    <label for="Conducteur">Covoitureur (je propose des trajets)</label><br>
 
                     <input type="radio" name="type_utilisateur" value="Passager et Conducteur" required>
-                    <label for="les_deux">les deux (je cherche et je propose des trajets)</label><br>
+                    <label for="Passager et Conducteur">les deux (je cherche et je propose des trajets)</label><br>
 
                 </fieldset>
 

@@ -3,6 +3,7 @@ require_once 'connexion/log.php';
 require_once 'connexion/session_prive.php';
 require_once 'connexion/recup_donnee.php';
 require_once 'connexion/preference.php';
+require_once 'connexion/voiture.php';
 ?>
 
 <!DOCTYPE html>
@@ -13,6 +14,89 @@ require_once 'connexion/preference.php';
     <title>Connexion - Eco Ride</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    /* Conteneur global de toutes les cartes */
+    .liste-voitures {
+    display: flex;
+    flex-wrap: wrap; /* Permet d’avoir plusieurs lignes */
+    gap: 20px; /* Espace entre les cartes */
+    justify-content: flex-start;
+    padding: 8px;
+    }
+
+    /* Chaque carte */
+    .Card_voitures {
+    display: flex;
+    width: 40%; /* Deux cartes par ligne environ */
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    }
+
+    /* Partie gauche : icône + énergie + supprimer */
+    .energie_supprimer {
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 15px;
+    }
+
+    /* Icône voiture */
+    .icone-voiture {
+    width: 60px;
+    height: auto;
+    margin-bottom: 10px;
+    }
+
+    /* Énergie */
+    .energie-voiture {
+    font-weight: bold;
+    margin-bottom: 10px;
+    }
+
+    /* Bouton supprimer */
+    .energie_supprimer button {
+    padding: 5px 10px;
+    background-color: #d9534f;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    }
+
+    .energie_supprimer button:hover {
+    background-color: #c9302c;
+    }
+
+    /* Partie droite : infos voiture */
+    .Card_info {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    }
+
+    .Card_info p {
+    display: flex;
+    justify-content: space-between; /* espace entre les deux spans */
+    margin: 8px 0; /* gap vertical uniforme */
+    }
+
+    .Card_info p span.gauche {
+    text-align: right; /* label aligné à droite */
+    width: 45%; /* ajuste si besoin */
+    }
+
+    .Card_info p span.droite {
+    text-align: left; /* valeur alignée à gauche */
+    width: 45%; /* ajuste si besoin */
+    }
+
+</style>
 
 </head>
 
@@ -22,26 +106,20 @@ require_once 'connexion/preference.php';
 
     <main>
             <h1>Bienvenue <?= htmlspecialchars($pseudo)?>!</h1>
-
             <img src="<?= htmlspecialchars($photo)?>" alt="avatar profil">
 
             <div class="info">
-                <p>
-                    Email :<?= htmlspecialchars($email)?>
-                    Téléphone :<?= htmlspecialchars($telephone)?>
-                    Solde du crédit :<?= htmlspecialchars($credit)?>
-                    Vous êtes : <?= htmlspecialchars($type_u)?>
-                </p>
+                <p>Email :<?= htmlspecialchars($email)?></p><br>
+                <p>Téléphone :<?= htmlspecialchars($telephone)?></p><br>
+                <p>Solde du crédit :<?= htmlspecialchars($credit)?></p><br>
+                <p>Vous êtes : <?= htmlspecialchars($type_u)?></p><br>
             </div>
 
             <form action="connexion/deconnexion.php">
                 <button type="submit">se déconnecter</button>
             </form>
 
-
-
             <button id="btn_preference">Mes Préférences</button>
-
             <div id="preference" style="display: none;">
                 <form action="connexion/new_preference.php" method="POST">
 
@@ -92,6 +170,36 @@ require_once 'connexion/preference.php';
                     <button id="btn_fermer" type="button">Fermer</button>
                 </form>
             </div>
+
+            <div id="liste-voitures">
+                <h2>Mes Voitures :</h2>
+
+                    <?php foreach($voitures_utilisateur as $voiture) : ?>
+
+                        <div class="Card_voitures">
+                            <div class="energie_supprimer">
+                                <?php if($voiture['energie'] === 'Hybride' || $voiture['energie'] === 'Electrique'){
+                                    $icone_voiture = 'assets/icons/icon_card_voiture_verte.png';
+                                }else{
+                                    $icone_voiture = 'assets/icons/icon_card_voiture.png';
+                                }?>
+                                <img src="<?= htmlspecialchars($icone_voiture)?>" alt="icone voiture">
+                                <p><?= htmlspecialchars($voiture['energie'])?></p>
+                                <form action="connexion/supprimer_voiture.php" method="POST">
+                                    <input name="id_voiture" type="hidden" value="<?= $voiture['id_voiture']?>">
+                                    <button type="submit">Supprimer</button>
+                                </form>
+                            </div>
+                            <div class="Card_info">
+                                <p><span class="gauche"><?=htmlspecialchars($voiture['marque'])?></span>  <span class="droite"><?=htmlspecialchars($voiture['modele'])?></span></p>
+                                <p><span class="gauche">Immatriculation</span>  <span class="droite"><?=htmlspecialchars($voiture['immat'])?></span></p>
+                                <p><span class="gauche">Couleur</span>  <span class="droite"><?=htmlspecialchars($voiture['couleur'])?></span></p>
+                                <p><span class="gauche">Places Disponibles</span>  <span class="droite"><?=htmlspecialchars($voiture['nb_place'])?></span></p>
+                            </div>  
+                        </div>
+                    <?php endforeach;?> 
+            </div>
+            <a href="ajouter_voiture.php" id>Ajoutez une voiture</a>
 
     </main>
 
