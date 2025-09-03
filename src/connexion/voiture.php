@@ -7,7 +7,7 @@ try{
     $prep_voiture = $pdo->prepare(
         "SELECT * 
         FROM voiture
-        WHERE id_utilisateur = ?"
+        WHERE id_conducteur = ?"
     );
     $prep_voiture->execute([$id_utilisateur]);
     $voitures_utilisateur = $prep_voiture->fetchAll();

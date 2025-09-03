@@ -41,7 +41,7 @@ CREATE TABLE preference (
 
 CREATE TABLE voiture(
     id_voiture INT PRIMARY KEY AUTO_INCREMENT,
-    id_utilisateur INT NOT NULL,
+    id_conducteur INT NOT NULL,
     marque VARCHAR(50) NOT NULL,
     modele VARCHAR(50) NOT NULL,
     immat VARCHAR(20) NOT NULL UNIQUE,
@@ -49,20 +49,19 @@ CREATE TABLE voiture(
     energie ENUM('Essence','Diesel','Hybride','Electrique') NOT NULL,
     couleur ENUM('Noir','Blanc','Gris foncé','Gris','Bordeaux','Rouge','Bleu foncé','Bleu','Vert Foncé','Vert','Marron','Beige','Orange','Jaune','Violet','Rose') NOT NULL,
     nb_place INT NOT NULL,
-    FOREIGN KEY (id_utilisateur) REFERENCES utilisateur (id_utilisateur)
+    FOREIGN KEY (id_conducteur) REFERENCES utilisateur (id_utilisateur)
 );
 
-CREATE TABLE convoiturage (
+CREATE TABLE covoiturage (
     id_convoiturage INT PRIMARY KEY AUTO_INCREMENT,
     date_depart DATE NOT NULL,
-    date_arrive DATE NOT NULL,
     heure_depart TIME NOT NULL,
-    heure_arrive TIME NOT NULL,
+    duree_voyage TIME NOT NULL,
     lieu_depart VARCHAR(50) NOT NULL,
     lieu_arrive VARCHAR(50) NOT NULL,
     nb_place_dispo INT NOT NULL,
     prix_personne DECIMAL(7,2) NOT NULL,
-    statut_convoit ENUM('planifier', 'en_cours', 'terminer', 'annuler') DEFAULT 'planifie',
+    statut_convoit ENUM('planifier', 'en_cours', 'terminer', 'annuler') DEFAULT 'planifier',
     id_conducteur INT NOT NULL ,
     id_voiture INT NOT NULL,
     FOREIGN KEY (id_conducteur) REFERENCES utilisateur (id_utilisateur),

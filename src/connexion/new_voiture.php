@@ -18,7 +18,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         $prep_immat = $pdo->prepare(
             "SELECT id_voiture
             FROM voiture
-            WHERE id_utilisateur = ?
+            WHERE id_conducteur = ?
             AND immat = ?"
         );
         $prep_immat->execute([$id_utilisateur,$immat]);
@@ -31,7 +31,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
         //PREPARATION POUR AJOUTER VOITURE
         $prep_voiture = $pdo->prepare(
-            "INSERT INTO voiture (id_utilisateur,marque,modele,immat,date_premiere_immat,energie,couleur,nb_place)
+            "INSERT INTO voiture (id_conducteur,marque,modele,immat,date_premiere_immat,energie,couleur,nb_place)
             VALUES (?,?,?,?,?,?,?,?)"
         );
         $prep_voiture->execute([$id_utilisateur,$marque,$modele,$immat,$date_premiere_immat,$energie,$couleur,$nb_place]);

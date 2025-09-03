@@ -201,10 +201,13 @@ require_once 'connexion/voiture.php';
                         </div>
                     <?php endforeach;?> 
             </div>
-            <a href="ajouter_voiture.php" id>Ajoutez une voiture</a>
+            <a href="ajouter_voiture.php" >Ajoutez une voiture</a>
             <?php endif ?>
 
-            
+            <div class="Covoit">
+                <h2>Covoiturage en cours</h2>
+                <a href="ajouter_covoiturage.php">Ajoutez un covoiturage</a>
+            </div>
 
     </main>
 

@@ -18,5 +18,8 @@ $erreur_inscription = $_SESSION['erreur_inscription'] ?? null;
 unset($_SESSION['erreur_inscription']);
 
 $erreur_ajout_voiture = $_SESSION['erreur_ajout_voiture'] ?? null;
-unset($_SESSION['erreur_inscription']);
+unset($_SESSION['erreur_ajout_voiture']);
+
+$erreur_ajout_covoiturage = $_SESSION['erreur_ajout_covoiturage'] ?? null;
+unset($_SESSION['erreur_ajout_covoiturage']);
 ?>
