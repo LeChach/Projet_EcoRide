@@ -19,30 +19,7 @@ require_once 'connexion/session.php';
 
     <section class="hero">
         <h1>Partageons la route, Protégeons notre avenir</h1>
-        <div class="hero_recherche">
-            <nav>
-                <ul>
-                    <li>
-                        <img src="assets/icons/home-05.png" alt="icone départ">
-                        Départ
-                    </li>
-                    <li>
-                        <img src="assets/icons/marker-05.png" alt="icone arrivé">
-                        Destination
-                    </li>
-                    <li>
-                        <img src="assets/icons/calendar-check.png" alt="icone calendrier">
-                        Date
-                    </li>
-                    <li>
-                        <img src="assets/icons/users-profiles-check.png" alt="icone personnes">
-                        Passager
-                    </li>
-                </ul>
-            </nav>
-
-            <button class="bouton_recherche">Rechercher</button>
-        </div>
+        <?php include 'includes/bar_recherche.php'?>
     </section>
 
     <section class="information">
@@ -93,5 +70,9 @@ require_once 'connexion/session.php';
     </section>
 
     <?php include 'includes/footer.php' ?>
+
+    <script>
+        document.getElementById('date_auj').value = new Date().toISOString().split('T')[0];
+    </script>
 </body>
 </html>

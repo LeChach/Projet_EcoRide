@@ -411,7 +411,7 @@ require_once 'connexion/recup_donnee.php';
                 <h2>Covoiturage en cours</h2>
                 <?php foreach($covoit_utilisateur as $covoit):?>
                     <div class="div_covoit">
-                        <div class = "date_covoit">
+                        <div class="date_covoit">
                             <p><?=$covoit['date_depart']?></p>
                         </div>
                         <div class="trajet">

@@ -8,6 +8,7 @@ CREATE TABLE utilisateur (
     photo VARCHAR(255) DEFAULT 'avatar_default.png',
     credit DECIMAL(7,2) DEFAULT 20,
     date_inscription DATE DEFAULT CURRENT_DATE,
+    note INT,
     type_utilisateur ENUM('Passager','Conducteur','Passager et Conducteur') NOT NULL,
     statut ENUM('actif','suspendu') DEFAULT 'actif'
 );
@@ -70,17 +71,17 @@ CREATE TABLE covoiturage (
 
 
 CREATE TABLE avis (
-    avis_id INT PRIMARY KEY AUTO_INCREMENT,
+    id_avis INT PRIMARY KEY AUTO_INCREMENT,
     commentaire TEXT,
     note INT NOT NULL,
     statut_avis ENUM('en_attente','refuser','valider') DEFAULT 'en_attente',
     date_avis DATETIME DEFAULT CURRENT_TIMESTAMP,
     id_passager INT NOT NULL,
     id_conducteur INT NOT NULL,
-    id_convoiturage INT NOT NULL,
+    id_covoiturage INT NOT NULL,
     FOREIGN KEY (id_passager) REFERENCES utilisateur (id_utilisateur),
     FOREIGN KEY (id_conducteur) REFERENCES utilisateur (id_utilisateur),
-    FOREIGN KEY (id_convoiturage) REFERENCES convoiturage (id_convoiturage)
+    FOREIGN KEY (id_covoiturage) REFERENCES covoiturage (id_covoiturage)
 );
 
 
@@ -103,10 +104,10 @@ CREATE TABLE reservation (
     statut_reservation ENUM('active','annulee') DEFAULT 'active',
     id_passager INT NOT NULL,
     id_conducteur INT NOT NULL,
-    id_convoiturage INT NOT NULL,
+    id_covoiturage INT NOT NULL,
     FOREIGN KEY (id_passager) REFERENCES  utilisateur (id_utilisateur),
     FOREIGN KEY (id_conducteur) REFERENCES utilisateur (id_utilisateur),
-    FOREIGN KEY (id_convoiturage) REFERENCES convoiturage (id_convoiturage)
+    FOREIGN KEY (id_covoiturage) REFERENCES covoiturage (id_covoiturage)
 );
 
 
@@ -118,8 +119,8 @@ CREATE TABLE validation_trajet (
     date_validation DATETIME DEFAULT CURRENT_TIMESTAMP,
     id_conducteur INT NOT NULL,
     id_passager INT NOT NULL,
-    id_convoiturage INT NOT NULL,
+    id_covoiturage INT NOT NULL,
     FOREIGN KEY (id_passager) REFERENCES  utilisateur (id_utilisateur),
     FOREIGN KEY (id_conducteur) REFERENCES utilisateur (id_utilisateur),
-    FOREIGN KEY (id_convoiturage) REFERENCES convoiturage (id_convoiturage)
+    FOREIGN KEY (id_covoiturage) REFERENCES covoiturage (id_covoiturage)
 );

@@ -22,4 +22,7 @@ unset($_SESSION['erreur_ajout_voiture']);
 
 $erreur_ajout_covoiturage = $_SESSION['erreur_ajout_covoiturage'] ?? null;
 unset($_SESSION['erreur_ajout_covoiturage']);
+
+
+$recherche_covoit = $_SESSION['recherche_covoit'] ?? null;
 ?>

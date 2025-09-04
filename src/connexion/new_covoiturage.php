@@ -1,6 +1,7 @@
 <?php
 require_once 'log.php';
 require_once 'session_prive.php';
+require_once '../function_php/convertir_ville.php';
 
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
@@ -11,8 +12,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         $min_depart = (int)$_POST['min_depart'];
         $duree_voyage_heure = (int)$_POST['duree_voyage_heure'];
         $duree_voyage_min = (int)$_POST['duree_voyage_min'];
-        $lieu_depart = $_POST['lieu_depart'];
-        $lieu_arrive = $_POST['lieu_arrive'];
+        $lieu_depart = formaterVille($_POST['lieu_depart']);
+        $lieu_arrive = formaterVille($_POST['lieu_arrive']);
         $prix_personne = $_POST['prix_personne'];
         $voiture_choisie = $_POST['id_voiture'];
         $heure_depart = sprintf('%02d:%02d:00',$h_depart,$min_depart);
