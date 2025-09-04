@@ -7,13 +7,15 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     try{
 
         $date_depart = $_POST['date_depart'];
-        $heure_depart = $_POST['heure_depart'];
+        $h_depart = (int)$_POST['heure_depart'];
+        $min_depart = (int)$_POST['min_depart'];
         $duree_voyage_heure = (int)$_POST['duree_voyage_heure'];
         $duree_voyage_min = (int)$_POST['duree_voyage_min'];
         $lieu_depart = $_POST['lieu_depart'];
         $lieu_arrive = $_POST['lieu_arrive'];
         $prix_personne = $_POST['prix_personne'];
         $voiture_choisie = $_POST['id_voiture'];
+        $heure_depart = sprintf('%02d:%02d:00',$h_depart,$min_depart);
         $duree_voyage = sprintf('%02d:%02d:00', $duree_voyage_heure, $duree_voyage_min);
 
 

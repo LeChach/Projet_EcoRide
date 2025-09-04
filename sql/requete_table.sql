@@ -53,7 +53,7 @@ CREATE TABLE voiture(
 );
 
 CREATE TABLE covoiturage (
-    id_convoiturage INT PRIMARY KEY AUTO_INCREMENT,
+    id_covoiturage INT PRIMARY KEY AUTO_INCREMENT,
     date_depart DATE NOT NULL,
     heure_depart TIME NOT NULL,
     duree_voyage TIME NOT NULL,
