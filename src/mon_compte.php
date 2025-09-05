@@ -329,43 +329,43 @@ require_once 'connexion/recup_donnee.php';
                 <form action="connexion/new_preference.php" method="POST">
 
 
-                    <img src="assets/icons/cigarette.png" alt="logo cigarette">
+                    <img src="assets/icons/cigarette.png" alt="logo cigarette" style="width:24px; height:24px;">
                     <label for="fumeur">Fumeur :
                     <input type="checkbox" name="fumeur" value="accepter" <?php if($pref_fumeur === 'accepter') echo 'checked' ?>>
                     </label><br>
 
-                    <img src="assets/icons/pattes.png" alt="logo patte de chien">
+                    <img src="assets/icons/pattes.png" alt="logo patte de chien" style="width:24px; height:24px;">
                     <label for="animaux">Animaux :
                     <input type="checkbox" name="animaux" value="accepter" <?php if($pref_animal === 'accepter') echo 'checked' ?>>
                     </label><br>
 
-                    <img src="assets/icons/silence.png" alt="logo silence">
+                    <img src="assets/icons/silence.png" alt="logo silence" style="width:24px; height:24px;">
                     <label for="silence">Silence :
                     <input type="checkbox" name="silence" value="accepter" <?php if($pref_silence === 'accepter') echo 'checked' ?>>
                     </label><br>
 
-                    <img src="assets/icons/note-de-musique.png" alt="logo musique">
+                    <img src="assets/icons/note-de-musique.png" alt="logo musique" style="width:24px; height:24px;">
                     <label for="musique">Musique :
                     <input type="checkbox" name="musique" value="accepter" <?php if($pref_musique === 'accepter') echo 'checked' ?>>
                     </label><br>
 
-                    <img src="assets/icons/climatisation.png" alt="logo climatisation">
+                    <img src="assets/icons/climatisation.png" alt="logo climatisation" style="width:24px; height:24px;">
                     <label for="climatisation">Climatisation :
                     <input type="checkbox" name="climatisation" value="accepter" <?php if($pref_clim === 'accepter') echo 'checked' ?>>
                     </label><br>
 
-                    <img src="assets/icons/bicyclette.png" alt="logo vélo">
+                    <img src="assets/icons/bicyclette.png" alt="logo vélo" style="width:24px; height:24px;">
                     <label for="velo">Vélo :
                     <input type="checkbox" name="velo" value="accepter" <?php if($pref_velo === 'accepter') echo 'checked' ?>>
                     </label><br>
 
-                    <img src="assets/icons/bonhomme-allumette.png" alt="logo coffre voiture bagage">
+                    <img src="assets/icons/bonhomme-allumette.png" alt="logo coffre voiture bagage" style="width:24px; height:24px;">
                     <label for="place_coffre">Place dans le coffre :
                     <input type="checkbox" name="place_coffre" value="accepter" <?php if($pref_coffre === 'accepter') echo 'checked' ?>>
                     </label><br>
                     
                     <?php if($pref_ladies_only == 'accepter' || $pref_ladies_only == 'refuser'): ?>
-                        <img src="assets/icons/femme.png" alt="logo femme">
+                        <img src="assets/icons/femme.png" alt="logo femme" style="width:24px; height:24px;">
                         <label for="ladies_only">Femme Uniquement :
                         <input type="checkbox" name="ladies_only" value="accepter" <?php if($pref_ladies_only === 'accepter') echo 'checked' ?>>
                         </label>

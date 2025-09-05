@@ -268,7 +268,7 @@ require_once 'connexion/session.php';
                             <div class="nb_dtl_supp">
                                 <span><?= htmlspecialchars($covoit['c_prix_personne'])?> € </span>
                                 <span><?= htmlspecialchars($covoit['c_nb_place_dispo'])?> Places Disponibles </span>
-                                <button id="btn_detail_covoit" type="button">Détails</button>
+                                <a href="detail.php?id=<?=$covoit['c_id']?>">Détails</a>
                                 <form action="connexion/participer_covoit.php" method="POST">
                                     <input name="id_covoiturage" type="hidden" value="<?=$id_utilisateur?>">
                                     <button>Participer</button>

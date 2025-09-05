@@ -14,7 +14,13 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         $duree_voyage_min = (int)$_POST['duree_voyage_min'];
         $lieu_depart = formaterVille($_POST['lieu_depart']);
         $lieu_arrive = formaterVille($_POST['lieu_arrive']);
-        $prix_personne = $_POST['prix_personne'];
+
+        if($_POST['prix_personne']>0){
+            $prix_personne = $_POST['prix_personne'];
+        }else{
+
+        }
+        
         $voiture_choisie = $_POST['id_voiture'];
         $heure_depart = sprintf('%02d:%02d:00',$h_depart,$min_depart);
         $duree_voyage = sprintf('%02d:%02d:00', $duree_voyage_heure, $duree_voyage_min);
@@ -61,7 +67,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         exit;
 
     } catch (PDOException $e) {
-        die ("Erreur connexion BDD : ".$e->getMessage());
+        error_log($e->getMessage());
+        header("Location: ../error.php");
+        exit;
     }
 }
 ?>
