@@ -25,8 +25,7 @@ try{
             WHERE id_utilisateur = ?"
         );
         $prep_utilisateur->execute([$id_conducteur['id_conducteur']]);
-        $info_utilisateur = $prep_utilisateur->fetchall();
-
+        $info_utilisateur = $prep_utilisateur->fetch(PDO::FETCH_ASSOC);
 
 
         //PREPARATION DE LA TABLE VOITURE ET COVOITURAGE
@@ -41,7 +40,7 @@ try{
             WHERE c.id_covoiturage = ?
         ");
         $prep_detail->execute([$id_covoit]);
-        $detail_covoit = $prep_detail->fetchAll();
+        $detail_covoit = $prep_detail->fetch(PDO::FETCH_ASSOC);
 
         //PREPARATION POUR LES PREFERENCE
         $prep_pref = $pdo->prepare(

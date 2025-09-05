@@ -41,7 +41,7 @@ require_once 'function_php/img_preference.php'
                     $icone_voiture = 'assets/icons/icon_card_voiture.png';
                 }?>
                 <img src="<?= htmlspecialchars($icone_voiture)?>" alt="icone voiture">
-                <p><?= htmlspecialchars($detail_covoit['energie'])?></p>
+                <p><?= htmlspecialchars($detail_covoit['v_energie'])?></p>
             </div>
             <div class="Card_info">
                 <p><span class="gauche"><?=htmlspecialchars($detail_covoit['v_marque'])?></span>  <span class="droite"><?=htmlspecialchars($detail_covoit['v_modele'])?></span></p>
@@ -84,6 +84,8 @@ require_once 'function_php/img_preference.php'
             <p>Aucun avis pour ce covoiturage.</p>
         <?php endif; ?>
     </div>
+
+    <a href="recherche.php">Fermer</a>
 
     <?php include 'includes/footer.php' ?>
 
