@@ -236,7 +236,7 @@ require_once 'connexion/session.php';
 
                     <div class="div_info_utilisateur_covoit">
 
-                        <div class="entete_resultat">
+                        <div class="entete_resultat" style="display: flex;align-items: center;gap: 10px;">
                             <img src="<?= htmlspecialchars($covoit['u_photo'])?>" alt="photo profil utilisateur">
                             <p><?= htmlspecialchars($covoit['u_pseudo'])?></p>
                             <div class="note">
@@ -269,9 +269,10 @@ require_once 'connexion/session.php';
                                 <span><?= htmlspecialchars($covoit['c_prix_personne'])?> € </span>
                                 <span><?= htmlspecialchars($covoit['c_nb_place_dispo'])?> Places Disponibles </span>
                                 <a href="detail.php?id=<?=$covoit['c_id']?>">Détails</a>
-                                <form action="connexion/participer_covoit.php" method="POST">
+                                <form action="confirmation_covoit.php" method="POST">
                                     <input name="id_utilisateur" type="hidden" value="<?=$id_utilisateur?>">
                                     <input name="id_covoiturage" type="hidden" value="<?=$covoit['c_id']?>">
+                                    <input type="hidden" name="nb_places" value="<?=$_POST['nb_place'] ?? 1?>">
                                     <button>Participer</button>
                                 </form>
                             </div>

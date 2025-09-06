@@ -11,7 +11,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
         $lieu_depart = formaterVille($_POST['lieu_depart']);
         $lieu_arrive = formaterVille($_POST['lieu_arrive']);
         $date_depart = $_POST['date_depart'];
-        $nb_place = $_POST['nb_place'];
+        $nb_places_voulu_par_le_passager = $_POST['nb_place'];
 
         //PREPARATION DE LA RECHERCHE DE COVOIT
         $prep_covoit = $pdo->prepare(
@@ -38,12 +38,12 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
             AND c.date_depart > ?
             AND c.nb_place_dispo > ?"
         );
-        $prep_covoit->execute([$lieu_depart,$lieu_arrive,$date_depart,$nb_place]);
+        $prep_covoit->execute([$lieu_depart,$lieu_arrive,$date_depart,$nb_places_voulu_par_le_passager]);
         $recherche_covoit = $prep_covoit->fetchAll();
 
         //ON STOCK LES RESULTATS DANS LA SESSION POUR LA REDIRECTION
         $_SESSION['recherche_covoit'] = $recherche_covoit;
-        header('Location: ../recherche.php');
+        header("Location: ../recherche.php?nb_places=".$_POST['nb_place']);
         exit;
         
 

@@ -21,16 +21,20 @@ if($_SERVER['REQUEST_METHOD'] === 'POST') {
         $info_utilisateur = $prep_connexion->fetch();
 
         if($info_utilisateur && password_verify($mot_de_passe,$info_utilisateur['mot_de_passe'])){
+            $_SESSION['id_utilisateur'] = $info_utilisateur['id_utilisateur'];
 
-            if (isset($_SESSION['redirect_after_login'])) {
-                $redirect = $_SESSION['redirect_after_login'];
-                unset($_SESSION['redirect_after_login']); // on nettoie
-                header("Location: $redirect");
+            if(isset($_SESSION['redirection_covoit'])){
+                $redirection = $_SESSION['redirection_covoit'];
+                unset($_SESSION['redirection_covoit']); 
+                header("Location: $redirection");
                 exit;
-            } else {
-                header("Location: mon_compte.php");
+
+            }else{
+                header("Location: ../mon_compte.php");
                 exit;
             }
+            
+            
         } else {
 
             $_SESSION['erreur_login'] = "pseudo ou mot de passe incorrect";

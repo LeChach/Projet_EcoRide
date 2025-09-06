@@ -89,6 +89,7 @@ CREATE TABLE virement (
     id_virement INT PRIMARY KEY AUTO_INCREMENT,
     montant_virement DECIMAL(5,2) NOT NULL,
     date_virement DATETIME DEFAULT CURRENT_TIMESTAMP,
+    statut ENUM('en_attente','refuser','valider'),
     id_passager INT NOT NULL,
     id_conducteur INT NOT NULL,
     FOREIGN KEY (id_passager) REFERENCES  utilisateur (id_utilisateur),
@@ -99,8 +100,6 @@ CREATE TABLE virement (
 CREATE TABLE reservation (
     id_reservation INT PRIMARY KEY AUTO_INCREMENT,
     nb_place_reserve INT NOT NULL,
-    etre_fumeur BOOLEAN DEFAULT FALSE,
-    avoir_animaux BOOLEAN DEFAULT FALSE,
     statut_reservation ENUM('active','annulee') DEFAULT 'active',
     id_passager INT NOT NULL,
     id_conducteur INT NOT NULL,
