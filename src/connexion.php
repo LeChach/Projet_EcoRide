@@ -1,6 +1,19 @@
 <?php
 require_once 'connexion/log.php';
 require_once 'connexion/session.php';
+require_once 'classes/Connexion.php';
+
+if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    $connexion = Connexion::connexionMonCompte($pdo, $_POST);
+    if($connexion['success']){
+        $_SESSION['id_utilisateur'] = $connexion['id_utilisateur'];
+        header('Location: mon_compte.php');
+    }else{
+        $_SESSION['erreur_connexion'] = $connexion['message'];
+        header('Location: connexion.php');
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -21,13 +34,13 @@ require_once 'connexion/session.php';
     <main>
         <section class="connexion">
             <h1>Connexion</h1>
-            <form action="connexion/se_connecter.php" method="POST">
+            <form method="POST">
                 
                 <label for="identifiant">Pseudo ou Email :</label>
                 <input type="text" id="identifiant" name="identifiant" required>
 
-                <label for="password">Mot de Passe :</label>
-                <input type="password" id="password" name="password" required>
+                <label for="mot_de_passe">Mot de Passe :</label>
+                <input type="password" id="mot_de_passe" name="mot_de_passe" required>
 
                 <button type="submit">Se Connecter</button>
             </form>
@@ -39,8 +52,8 @@ require_once 'connexion/session.php';
         </div>
     </main>
 
-    <?php if ($erreur_log): ?>
-        <p style="color:red;"><?= htmlspecialchars($erreur_log) ?></p>
+    <?php if ($erreur_connexion): ?>
+        <p style="color:red;"><?= htmlspecialchars($erreur_connexion) ?></p>
     <?php endif; ?>
 
     <?php include 'includes/footer.php' ?>

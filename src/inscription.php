@@ -1,6 +1,19 @@
 <?php
 require_once 'connexion/log.php';
 require_once 'connexion/session.php';
+require_once 'classes/Connexion.php';
+
+if($_SERVER['REQUEST_METHOD'] == 'POST'){
+    $inscription = Connexion::inscriptionMonCompte($pdo,$_POST);
+    if($inscription['success']){
+        $_SESSION['id_utilisateur'] = $inscription['id_utilisateur'];
+        header('Location: mon_compte.php');
+    }else{
+        $erreur_inscription = $inscription['message'];
+        header('Location: inscription.php');
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -23,7 +36,7 @@ require_once 'connexion/session.php';
 
             <h1>S'inscrire</h1>
 
-            <form action="connexion/s_inscrire.php" method="POST">
+            <form method="POST">
 
                 <fieldset>
                     <legend>Je suis :</legend>
@@ -47,7 +60,10 @@ require_once 'connexion/session.php';
                 <input type="email" id="email" name="email" required>
 
                 <label for="password">Mot de Passe :</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password" required
+                pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}"
+                title="Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial">
+                >
 
                 <label for="phone">Téléphone :</label>
                 <input type="tel" id="phone" name="phone" required>

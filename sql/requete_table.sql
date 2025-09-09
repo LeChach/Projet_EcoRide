@@ -89,18 +89,20 @@ CREATE TABLE virement (
     id_virement INT PRIMARY KEY AUTO_INCREMENT,
     montant_virement DECIMAL(5,2) NOT NULL,
     date_virement DATETIME DEFAULT CURRENT_TIMESTAMP,
-    statut ENUM('en_attente','refuser','valider'),
+    statut ENUM('en_attente','remboursement','valider','annuler'),
     id_passager INT NOT NULL,
     id_conducteur INT NOT NULL,
+    id_covoiturage INT NOT NULL,
     FOREIGN KEY (id_passager) REFERENCES  utilisateur (id_utilisateur),
-    FOREIGN KEY (id_conducteur) REFERENCES utilisateur (id_utilisateur)
+    FOREIGN KEY (id_conducteur) REFERENCES utilisateur (id_utilisateur),
+    FOREIGN KEY (id_covoiturage) REFERENCES covoiturage (id_covoiturage)
 );
 
 
 CREATE TABLE reservation (
     id_reservation INT PRIMARY KEY AUTO_INCREMENT,
     nb_place_reserve INT NOT NULL,
-    statut_reservation ENUM('active','annulee') DEFAULT 'active',
+    statut_reservation ENUM('active','annuler','terminer') DEFAULT 'active',
     id_passager INT NOT NULL,
     id_conducteur INT NOT NULL,
     id_covoiturage INT NOT NULL,
@@ -122,4 +124,14 @@ CREATE TABLE validation_trajet (
     FOREIGN KEY (id_passager) REFERENCES  utilisateur (id_utilisateur),
     FOREIGN KEY (id_conducteur) REFERENCES utilisateur (id_utilisateur),
     FOREIGN KEY (id_covoiturage) REFERENCES covoiturage (id_covoiturage)
+);
+
+CREATE TABLE commission (
+    id_commission INT AUTO_INCREMENT PRIMARY KEY,
+    id_covoiturage INT NOT NULL,
+    id_conducteur INT NOT NULL,
+    montant DECIMAL(7,2) NOT NULL DEFAULT 2,
+    date_commission DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_covoiturage) REFERENCES covoiturage (id_covoiturage),
+    FOREIGN KEY (id_conducteur) REFERENCES utilisateur(id_utilisateur)
 );

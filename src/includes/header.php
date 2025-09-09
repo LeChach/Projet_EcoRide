@@ -1,5 +1,4 @@
 <header>
-
     <div class="logo">
         <img src="assets/icons/logo_header.png" alt="logo EcoRide header">
     </div>
