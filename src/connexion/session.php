@@ -6,8 +6,8 @@ if (session_status() === PHP_SESSION_NONE) {
 //permet de recup l'id de l'utilisateur connecté
 $id_utilisateur = $_SESSION['id_utilisateur'] ?? null;
 
-
-
+$erreur = $_SESSION['erreur'] ?? null;
+unset($_SESSION['erreur']);
 
 $erreur_connexion = $_SESSION['erreur_connexion'] ?? null;
 unset($_SESSION['erreur_connexion']);

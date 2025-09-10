@@ -62,7 +62,7 @@ CREATE TABLE covoiturage (
     lieu_arrive VARCHAR(50) NOT NULL,
     nb_place_dispo INT NOT NULL,
     prix_personne DECIMAL(7,2) NOT NULL,
-    statut_convoit ENUM('planifier', 'en_cours', 'terminer', 'annuler') DEFAULT 'planifier',
+    statut_covoit ENUM('planifier', 'en_cours', 'terminer', 'annuler') DEFAULT 'planifier',
     id_conducteur INT NOT NULL ,
     id_voiture INT NOT NULL,
     FOREIGN KEY (id_conducteur) REFERENCES utilisateur (id_utilisateur),

@@ -34,7 +34,7 @@ class MonCompte {
                     avec_climatisation,
                     avec_velo,
                     place_coffre,
-                    ladies_only,
+                    ladies_only
                     FROM preference 
                     WHERE id_utilisateur = ?"
                 );
@@ -96,11 +96,11 @@ class MonCompte {
     */
     public static function changerTypeUtilisateur (PDO $pdo, int $id_utilisateur, string $type_changement): array {
         try{
-            //verification de la conformité du type a insérer (=Passager || Conducteur || Passager et Conducteur)
-            if(!$type_changement || $type_changement !== 'Passager'|| $type_changement !== 'Conducteur'|| $type_changement !== 'Passager et Conducteur' ){
+            //verification de la conformité du type a insérer
+            $verificiation = ['Passager','Conducteur','Passager et Conducteur'];
+            if(!in_array($type_changement,$verificiation)){
                 return ['success' => false, 'message' => 'type utilisateur non reconnu'];
             }
-
             //PREPARATION du changement du type utilisateur
             $prep_typeU = $pdo->prepare(
                 "UPDATE utilisateur
@@ -136,12 +136,12 @@ class MonCompte {
             $sexe_utilisateur = $prep_sexe->fetch();
 
             //RECUPERATION DES NOUVELLE DONNEES (si coché = $data sera 'accepter' sinon $data sera null donc 'refuser')
-            $new_pref_fumeur = $data['fumeur'] ?? 'refuser';
-            $new_pref_animal = $data['animaux'] ?? 'refuser';
-            $new_pref_silence = $data['silence'] ?? 'refuser';
-            $new_pref_musique = $data['musique'] ?? 'refuser';
-            $new_pref_clim = $data['climatisation'] ?? 'refuser';
-            $new_pref_velo = $data['velo'] ?? 'refuser';
+            $new_pref_fumeur = $data['etre_fumeur'] ?? 'refuser';
+            $new_pref_animal = $data['avoir_animal'] ?? 'refuser';
+            $new_pref_silence = $data['avec_silence'] ?? 'refuser';
+            $new_pref_musique = $data['avec_musique'] ?? 'refuser';
+            $new_pref_clim = $data['avec_climatisation'] ?? 'refuser';
+            $new_pref_velo = $data['avec_velo'] ?? 'refuser';
             $new_pref_coffre = $data['place_coffre'] ?? 'refuser';
             if ($sexe_utilisateur['sexe'] === 'Femme'){
                 $new_pref_ladies_only = $data['ladies_only'] ?? 'refuser';
@@ -203,7 +203,7 @@ class MonCompte {
             ");
             $prep_typeU->execute([$id_utilisateur]);
             $type_utilisateur = $prep_typeU->fetch();
-            if(!$type_utilisateur || $type_utilisateur['type_utilisateur'] != 'Conducteur' || $type_utilisateur['type_utilisateur'] != 'Passager et Conducteur'){
+            if(!$type_utilisateur || $type_utilisateur['type_utilisateur'] === 'Passager'){
                 return ['success' => false , 'message' => 'type_utilisateur non conforme'];
             }
 

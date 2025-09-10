@@ -10,74 +10,7 @@ require_once 'connexion/session_prive.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajoutez Voiture - Eco Ride</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-
-    /* Conteneur principal */
-    .conteneur-couleur {
-      width: 250px;
-      margin: 20px auto;
-      position: relative;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-    }
-
-    /* Champ texte qui affichera le nom de la couleur */
-    input#champ-couleur {
-      border: 1px solid #aaa;
-      padding: 8px;
-      width: 150px;
-      text-transform: capitalize;
-    }
-
-    /* Petit carré qui montre la couleur sélectionnée */
-    .apercu-couleur {
-      display: inline-block;
-      width: 40px;
-      height: 36px;
-      border: 1px solid #aaa;
-      margin-left: 8px;
-      vertical-align: middle;
-    }
-
-    /* La palette complète (liste des couleurs) */
-    .palette-couleur {
-      display: none; /* cachée par défaut */
-      position: absolute;
-      top: 60px;
-      left: 0;
-      background: #f3f3f3;
-      padding: 5px;
-      border: 1px solid #ccc;
-      box-shadow: 0 0 5px rgba(0,0,0,0.2);
-      width: 200px;
-    }
-
-    /* Chaque couleur de la palette */
-    .option-couleur {
-      width: 20px;
-      height: 20px;
-      margin: 3px;
-      float: left;
-      border: 1px solid #ddd;
-      cursor: pointer;
-    }
-
-    .option-couleur:hover {
-      border: 1px solid #333;
-    }
-
-    .clearfix::after {
-      content: "";
-      display: table;
-      clear: both;
-    }
-  </style>
+    <link rel="stylesheet" href="assets/css/style.css">
 
 </head>
 
@@ -85,60 +18,74 @@ require_once 'connexion/session_prive.php';
 
     <?php include 'includes/header.php' ?>
 
-    <form action="connexion/new_voiture.php" method="POST">
-        <fieldset>
-            <legend>Ajouter une nouvelle voiture :</legend>
+    <form action="mon_compte.php" method="POST">
+        <input type="hidden" name="type_POST" value="ajouter_voiture">
 
-            <?php if ($erreur_ajout_voiture): ?>
-              <p style="color:red;"><?= $erreur_ajout_voiture ?></p>
-            <?php endif; ?>            
+        <h1>Ajouter une nouvelle voiture :</h1>
+        <?php if ($erreur_ajout_voiture): ?>
+            <p style="color:red;"><?= $erreur_ajout_voiture ?></p>
+        <?php endif; ?> 
 
-            <label for="marque">Marque :</label>
+        <div class="info_new_voiture">
+            
+            <span for="marque">Marque :</span>
             <input type="text" name="marque" id="marque" required>
 
-            <label for="modele">Modèle :</label>
+            <span for="modele">Modèle :</span>
             <input type="text" name="modele" id="modele" required>
 
-            <label for="immat">Immatriculation :</label>
+            <span for="nb_place">Nombre de place Disponible :</span>
+            <input type="number" name="nb_place" min=1 value="1" required>
+
+        </div>
+        <p></p>
+        <p></p>
+        <div class="info_new_voiture">
+
+            <span for="immat">Immatriculation :</span>
             <input type="text" name="immat" id="immat" required>
 
-            <label for="immat">Date de première immatriculation :</label>
+            <span for="immat">Date de première immatriculation :</span>
             <input type="date" name="date_premiere_immat" id="immat" value="2025-01-01" required>
 
-            <fieldset>
-                <legend>Je roule en :</legend>
-                    <input type="radio" name ="energie" value="Essence" required>
-                    <label for="energie">thermique (Essence)</label>
-                    <input type="radio" name ="energie" value="Diesel">
-                    <label for="energie">thermique (Diesel)</label>
-                    <input type="radio" name ="energie" value="Hybride">
-                    <label for="energie">Hybride</label>
-                    <input type="radio" name ="energie" value="Electrique">
-                    <label for="energie">Electrique</label>
-            </fieldset>
+        </div>
+        <p></p>
+        <p></p>
+        <div class="info_new_voiture">
 
-            <fieldset>
-                <legend>Choisir la couleur de votre voiture</legend>
-                <div class="conteneur-couleur">
-                    <label for="champ-couleur">Couleur :</label>
-                    <input type="text" name="couleur" id="champ-couleur" readonly placeholder="Appuyez ici pour selectionner une couleur" required>
-                    <div class="apercu-couleur" id="apercu-couleur"></div>
-                    <div class="palette-couleur clearfix" id="palette-couleur"></div>
-                </div>
-            </fieldset>
+            <p>Je roule en :</p>
+            <span for="energie">thermique (Essence)</span>
+            <input type="radio" name ="energie" value="Essence" required><br>
+            
+            <span for="energie">thermique (Diesel)</span>
+            <input type="radio" name ="energie" value="Diesel"><br>
 
-            <label for="nb_place">Nombre de place Disponible :</label>
-            <input type="number" name="nb_place" min="1" required>
-
-        </fieldset>
-
+            <span for="energie">Hybride</span>
+            <input type="radio" name ="energie" value="Hybride"><br>
+          
+            <span for="energie">Electrique</span>
+            <input type="radio" name ="energie" value="Electrique"><br>
+                
+        </div>
+        <p></p>
+        <p></p>
+        <div class="info_new_voiture">
+            <legend>Choisir la couleur de votre voiture</legend>
+            <div class="conteneur-couleur">
+            <span for="champ-couleur">Couleur :</span>
+            <input type="text" name="couleur" id="champ-couleur" readonly placeholder="Appuyez ici pour selectionner une couleur" required>
+            <div class="apercu-couleur" id="apercu-couleur"></div>
+            <div class="palette-couleur clearfix" id="palette-couleur"></div>
+        </div>
+        </div>
+        <p></p>
+        <p></p>
         <button type="submit">Ajoutez ma nouvelle voiture</button>
-
     </form>
 
 <?php include 'includes/footer.php' ?>
 <script>
-    const couleurs = {
+      const couleurs = {
         "Noir": "#000000",
         "Blanc": "#FFFFFF",
         "Gris foncé": "#A9A9A9",

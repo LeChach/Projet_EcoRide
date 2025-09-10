@@ -42,7 +42,9 @@ header .bouton_connexion{
 .bouton_connexion:hover {
     background-color: #43a047;
 }
-
+.icone{
+    width:40px; height:40px;
+}
 
 /*----------------BODY-----------------------*/
 body {
@@ -56,6 +58,134 @@ body {
     display: flex;
     flex-direction: column;
 }
+
+/*----------------MON_COMPTE-----------------------*/
+.carte_voiture{
+    margin:3rem;
+    display: flex;
+    justify-content: space-between;
+    width: 40%;
+    border: solid
+}
+.carte_covoiturage{
+    display: flex;
+    justify-content: space-between;
+    width: 60%;
+    border: solid
+
+}
+.duree_voyage{
+    display: flex;
+    justify-content: space-between;
+    gap:2rem;
+}
+.depart_arrive{
+    display: flex;
+    flex-direction: column;
+}
+.carte_voiture_droit{
+    display: flex;
+    justify-content: space-between;
+}
+    
+
+/*----------------AJOUTER VOITURE--------------*/
+
+    /* Conteneur principal */
+    .conteneur-couleur {
+      width: 250px;
+      margin: 20px auto;
+      position: relative;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    /* Champ texte qui affichera le nom de la couleur */
+    input#champ-couleur {
+      cursor: pointer;
+      border: 1px solid #aaa;
+      padding: 8px;
+      width: 150px;
+      text-transform: capitalize;
+    }
+
+    /* Petit carré qui montre la couleur sélectionnée */
+    .apercu-couleur {
+      display: inline-block;
+      width: 40px;
+      height: 36px;
+      border: 1px solid #aaa;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    /* La palette complète (liste des couleurs) */
+    .palette-couleur {
+      display: none; /* cachée par défaut */
+      position: absolute;
+      top: 60px;
+      left: 0;
+      background: #f3f3f3;
+      padding: 5px;
+      border: 1px solid #ccc;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+      width: 200px;
+    }
+
+    /* Chaque couleur de la palette */
+    .option-couleur {
+      width: 20px;
+      height: 20px;
+      margin: 3px;
+      float: left;
+      border: 1px solid #ddd;
+      cursor: pointer;
+    }
+
+    .option-couleur:hover {
+      border: 1px solid #333;
+    }
+
+    .clearfix::after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*----------------HERO-----------------------*/
 /* Hero Section */
 .hero {
@@ -85,8 +215,10 @@ body {
 /* Tous les éléments enfants passent devant l'overlay */
 .hero > * {
     position: relative;
-    z-index: 2;
+    z-index: 1;
 }
+
+
 
 /* Titre principal */
 .hero h1 {
