@@ -7,79 +7,102 @@ class MonCompte {
      * permet de récupérer les données utilisateur pour l'affichage
      * @param PDO $pdo : le lien avec la bdd
      * @param int $id_utilisateur : l'id de l'utilisateur
-     * @return array : un tableau avec les données
+     * @return array ['success'=>bool,'message'=>'','info_utilisateur'=>[],'info_preference'=>[],'info_voiture'=>[],'info_covoiturage_c'=>[],'info_covoiturage_p'=>[] ]
      */
     public static function recupDonnee (PDO $pdo, int $id_utilisateur): array {
 
         try{
-
             //PREPARATION DE LA TABLE UTILISATEUR
-            $prep_utilisateur = $pdo->prepare(
-                "SELECT * 
-                FROM utilisateur 
-                WHERE id_utilisateur = ?"
-                );
-                
-            $prep_utilisateur->execute([$id_utilisateur]);
-            $info_utilisateur = $prep_utilisateur->fetch(PDO::FETCH_ASSOC);
-
+                $prep_utilisateur = $pdo->prepare(
+                    "SELECT * 
+                    FROM utilisateur 
+                    WHERE id_utilisateur = ?"
+                    );
+                    
+                $prep_utilisateur->execute([$id_utilisateur]);
+                $info_utilisateur = $prep_utilisateur->fetch(PDO::FETCH_ASSOC);
 
             //PREPARATION DE LA TABLE PREFERENCE
-            $prep_pref = $pdo->prepare(
-                    "SELECT 
-                    etre_fumeur,
-                    avoir_animal,
-                    avec_silence,
-                    avec_musique,
-                    avec_climatisation,
-                    avec_velo,
-                    place_coffre,
-                    ladies_only
-                    FROM preference 
-                    WHERE id_utilisateur = ?"
-                );
-                
-            $prep_pref->execute([$id_utilisateur]);
-            $pref_utilisateur = $prep_pref->fetch(PDO::FETCH_ASSOC);
+                $prep_pref = $pdo->prepare(
+                        "SELECT 
+                        etre_fumeur,
+                        avoir_animal,
+                        avec_silence,
+                        avec_musique,
+                        avec_climatisation,
+                        avec_velo,
+                        place_coffre,
+                        ladies_only
+                        FROM preference 
+                        WHERE id_utilisateur = ?"
+                    );   
+                $prep_pref->execute([$id_utilisateur]);
+                $pref_utilisateur = $prep_pref->fetch(PDO::FETCH_ASSOC);
     
             //PREPARATION DE LA TABLE VOITURE
-            $prep_voiture = $pdo->prepare(
-                "SELECT * 
-                FROM voiture
-                WHERE id_conducteur = ?"
-            );
-            $prep_voiture->execute([$id_utilisateur]);
-            $voitures_utilisateur = $prep_voiture->fetchAll();
+                $prep_voiture = $pdo->prepare(
+                    "SELECT * 
+                    FROM voiture
+                    WHERE id_conducteur = ?"
+                );
+                $prep_voiture->execute([$id_utilisateur]);
+                $voitures_utilisateur = $prep_voiture->fetchAll();
 
 
             //PREPARATION DE LA TABLE COVOITURAGE = pour quand je suis conducteur
-            $prep_covoit_conducteur = $pdo->prepare(
-                "SELECT *
-                FROM covoiturage
-                WHERE id_conducteur = ?"
-            );
-            $prep_covoit_conducteur->execute([$id_utilisateur]);
-            $covoit_conducteur = $prep_covoit_conducteur->fetchAll();
+                $prep_covoit_conducteur = $pdo->prepare(
+                    "SELECT *
+                    FROM covoiturage
+                    WHERE id_conducteur = ?"
+                );
+                $prep_covoit_conducteur->execute([$id_utilisateur]);
+                $covoit_conducteur = $prep_covoit_conducteur->fetchAll();
 
             //PREPARATION DE LA TABLE RESERVATION = pour quand je suis passager
-            $prep_covoit_passager = $pdo->prepare(
-                "SELECT c.*, r.*
-                FROM covoiturage c
+                $prep_covoit_passager = $pdo->prepare(
+                    "SELECT c.*, r.*
+                    FROM covoiturage c
+                    INNER JOIN reservation r ON c.id_covoiturage = r.id_covoiturage
+                    WHERE r.id_passager = ?"
+                );
+                $prep_covoit_passager->execute([$id_utilisateur]);
+                $covoit_passager = $prep_covoit_passager->fetchAll(PDO::FETCH_ASSOC);
+
+
+            //PREPARATION DE LHISTORIQUE CONDUCTEUR
+                $prep_historique_conducteur = $pdo->prepare(
+                    "SELECT c.*, a.*
+                    FROM covoiturage c 
+                    INNER JOIN avis a ON c.id_covoiturage=a.id_covoiturage
+                    WHERE c.id_conducteur = ?
+                    AND (c.statut_covoit = ? OR c.statut_covoit = ?)
+                    AND a.statut_avis = ?
+                ");
+                $prep_historique_conducteur->execute([$id_utilisateur,'terminer','annuler','valider']);
+                $info_historique_c = $prep_historique_conducteur->fetchALL();
+            //PREPARATION DE LHISTORIQUE PASSAGER
+                $prep_historique_passager = $pdo->prepare(
+                "SELECT c.*, a.*
+                FROM covoiturage c 
+                INNER JOIN avis a ON c.id_covoiturage = a.id_covoiturage
                 INNER JOIN reservation r ON c.id_covoiturage = r.id_covoiturage
-                WHERE r.id_passager = ?"
-            );
-            $prep_covoit_passager->execute([$id_utilisateur]);
-            $covoit_passager = $prep_covoit_passager->fetchAll(PDO::FETCH_ASSOC);
-
-
+                WHERE r.id_passager = ?
+                AND (c.statut_covoit = ? OR c.statut_covoit = ?) 
+                AND a.statut_avis = ?
+                ");
+                $prep_historique_passager->execute([$id_utilisateur,'terminer','annuler','valider']);
+                $info_historique_p = $prep_historique_passager->fetchALL();
+            //RETURN
             return ['success' => true, 
-            'message' => 'Donnée correctement récupérer',
-            'info_utilisateur' => $info_utilisateur,
-            'info_preference' => $pref_utilisateur,
-            'info_voiture' => $voitures_utilisateur,
-            'info_covoiturage_c' => $covoit_conducteur,
-            'info_covoiturage_p' => $covoit_passager
-        ];
+                    'message' => 'Donnée correctement récupérer',
+                    'info_utilisateur' => $info_utilisateur,
+                    'info_preference' => $pref_utilisateur,
+                    'info_voiture' => $voitures_utilisateur,
+                    'info_covoiturage_c' => $covoit_conducteur,
+                    'info_covoiturage_p' => $covoit_passager,
+                    'info_historique_c' => $info_historique_c,
+                    'info_historique_p' => $info_historique_p
+            ];
 
         } catch (PDOException $e) {
             error_log($e->getMessage());
@@ -282,6 +305,8 @@ class MonCompte {
             return ['success' => false, 'message' => 'Echec du changement des données'];
         }
     }
+
+
 }
 
 ?>

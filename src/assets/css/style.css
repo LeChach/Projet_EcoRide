@@ -46,6 +46,10 @@ header .bouton_connexion{
     width:40px; height:40px;
 }
 
+
+html{
+    margin :0rem 3rem;
+}
 /*----------------BODY-----------------------*/
 body {
     margin:0; padding:0;
@@ -61,7 +65,7 @@ body {
 
 /*----------------MON_COMPTE-----------------------*/
 .carte_voiture{
-    margin:3rem;
+    margin: 0.5rem 0rem;
     display: flex;
     justify-content: space-between;
     width: 40%;
@@ -84,6 +88,11 @@ body {
     flex-direction: column;
 }
 .carte_voiture_droit{
+    display: flex;
+    justify-content: space-between;
+}
+
+.div_historique{
     display: flex;
     justify-content: space-between;
 }

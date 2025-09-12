@@ -3,12 +3,13 @@ require_once 'connexion/log.php';
 require_once 'connexion/session_prive.php';
 require_once 'classes/MonCompte.php';
 require_once 'classes/Connexion.php';
-require_once 'function_php/fonction.php';
+require_once 'fonction_php/fonction.php';
 
 
 $info_utilisateur = MonCompte::recupDonnee($pdo,$id_utilisateur);
 if(!$info_utilisateur['success']){
     $_SESSION['erreur_connexion'] = $info_utilisateur['message'];
+    session_destroy();
     header('location: connexion.php');
     exit;
 }
@@ -18,40 +19,75 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     switch ($_POST['type_POST']){
 
         case 'MAJ_type_utilisateur':
-            $message = MonCompte::changerTypeUtilisateur($pdo,$id_utilisateur,$_POST['type_u']);
-            if(!$message['success']){
-                $_SESSION['erreur'] = $message['message'];
+            $fonction = MonCompte::changerTypeUtilisateur($pdo,$id_utilisateur,$_POST['type_u']);
+            if(!$fonction['success']){
+                $_SESSION['erreur'] = $fonction['message'];
             }
             header('Location: mon_compte.php');
             exit;
 
         case 'MAJ_preferences':
-            $message = MonCompte::changerPréférence($pdo,$id_utilisateur,$_POST);
-            if(!$message['success']){
-                $_SESSION['erreur'] = $message['message'];
+            $fonction = MonCompte::changerPréférence($pdo,$id_utilisateur,$_POST);
+            if(!$fonction['success']){
+                $_SESSION['erreur'] = $fonction['message'];
             }
             header('Location: mon_compte.php');
             exit;
 
         case 'supprimer_voiture':
-            $message = MonCompte::supprimerVoiture($pdo,$id_utilisateur,$_POST['id_voiture']);    
-            if(!$message['success']){
-                $_SESSION['erreur'] = $message['message'];
+            $fonction = MonCompte::supprimerVoiture($pdo,$id_utilisateur,$_POST['id_voiture']);    
+            if(!$fonction['success']){
+                $_SESSION['erreur'] = $fonction['message'];
             }
             header('Location: mon_compte.php');
             exit;
 
         case 'ajouter_voiture':
-            $message = MonCompte::ajouterVoiture($pdo,$id_utilisateur,$_POST);    
-            if(!$message['success']){
-                $_SESSION['erreur'] = $message['message'];
+            $fonction = MonCompte::ajouterVoiture($pdo,$id_utilisateur,$_POST);    
+            if(!$fonction['success']){
+                $_SESSION['erreur'] = $fonction['message'];
+            }
+            header('Location: mon_compte.php');
+            exit;
+
+        case 'supprimer_covoiturage':
+            $fonction = Covoiturage::supprimerCovoiturage($pdo,$id_utilisateur,$_POST['id_covoiturage']);
+            if(!$fonction['success']){
+                $_SESSION['erreur'] = $fonction['message'];
             }
             header('Location: mon_compte.php');
             exit;
 
         case 'demarrer_covoiturage':
+            $fonction = Covoiturage::demarrerCovoiturage($pdo,$id_utilisateur,$_POST['id_covoiturage']);
+            if(!$fonction['success']){
+                $_SESSION['erreur'] = $fonction['message'];
+            }
+            header('Location: mon_compte.php');
+            exit;
+
         case 'terminer_covoiturage':
+            $fonction = Covoiturage::terminerCovoiturage($pdo,$id_utilisateur,$_POST['id_covoiturage']);
+            if(!$fonction['success']){
+                $_SESSION['erreur'] = $fonction['message'];
+            }
+            foreach($fonction['email'] as $email){
+                $subject = 'Mise à jour de votre Covoiturage';
+                $message = "Bonjour,\n\nVotre covoiturage est désormais terminé !\n\nVeuillez vous rendre sur votre espace personnel si vous souhaitez donner votre avis !\n\nCordialement,\nL'équipe Eco-Ride";
+                $headers = 'From: noreply@eco-ride.com' . "\r\n" .'Content-Type: text/plain; charset=UTF-8';
+                mail($email, $subject, $message, $headers);
+                }
+            header('Location: mon_compte.php');
+            exit;
         case 'annuler_covoiturage':
+            $fonction = Covoiturage :: annulerCovoiturage($pdo,$id_utilisateur,$_POST['id_covoiturage']);
+            if(!$fonction['success']){
+                $_SESSION['erreur'] = $fonction['message'];
+            }
+            header('Location: mon_compte.php');
+            exit;
+
+        case 'donner_avis':
 
         default:
             header('Location: mon_compte.php');
@@ -77,7 +113,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     <!--affiche l'erreur de chargement des données-->
     <?php if(!$info_utilisateur['success']): ?>
         <p><?= htmlspecialchars($info_utilisateur['message'])?></p>
+        <?php if ($erreur_avis): ?>
+            <p style="color:red;"><?= htmlspecialchars($erreur_avis) ?></p>
+        <?php endif; ?>
     <?php else :?>
+
 
         <!--affiche l'erreur d'un des POST-->
         <?php if(isset($erreur)): ?>
@@ -141,9 +181,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
         </div>
         <p></p>
         <p></p>
-        <!--Partie invisible si n'est pas minimum conducteur-->
+        <!--Partie invisible si = passager -->
         <?php if($info_utilisateur['info_utilisateur']['type_utilisateur'] !== 'Passager' ) : ?>
-
         <div class="preference">
             <h2>MES PREFERENCES</h2>
             <p></p>
@@ -163,7 +202,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
         <p></p>
         <p></p>
         <div class="voiture">
-            <h2>MA VOITURES</h2>
+            <h2><?php echo (count($info_utilisateur['info_voiture']) > 1) ? "Mes Voitures" : "Ma Voiture"; ?></h2>            
             <p></p>
             <?php foreach ($info_utilisateur['info_voiture'] as $voiture):?>
 
@@ -209,11 +248,13 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
         </div>
         <p></p>
         <p></p>
-        <div class="covoiturage_conducteur">
-            <h2>Covoiturage en cours</h2>
-
+        <div class="covoiturage_conducteur_en_cours">
+            <h2>Mes Covoiturage en cours</h2>
+            <?php if(empty($info_utilisateur['info_covoiturage_c'])):?>
+                <span>Aucun covoiturage créé</span>
+            <?php else:?>
             <?php foreach ($info_utilisateur['info_covoiturage_c'] as $covoiturage) : ?>
-                <?php if($covoiturage['statut_covoit'] === 'terminer' || $covoiturage['statut_covoit'] === 'annuler'){continue;}?>
+                <?php if($covoiturage['statut_covoit'] === 'terminer' || $covoiturage['statut_covoit'] === 'annuler'){continue;}?>    
                 <div class="carte_covoiturage">
                     <div class="date_covoit">
                         <span>Le <?= date('d/m/Y',strtotime($covoiturage['date_depart']))?></span>
@@ -251,7 +292,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                                 <button type="submit">Démarrer</button>
                             </form>
                             <form method="POST">
-                                <input type="hidden" name="type_POST" value="annuler_covoiturage">
+                                <input type="hidden" name="type_POST" value="supprimer_covoiturage">
                                 <input type="hidden" name="id_covoiturage" value="<?=$covoiturage['id_covoiturage']?>">
                                 <button type="submit">Annuler</button>
                             </form>
@@ -264,19 +305,172 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                         <?php endif;?>
                     </div>
                 </div>
-            <?php endforeach;?> 
-
+            <?php endforeach;?>
+            <?php endif;?>
             <a href="ajouter_covoiturage.php">Ajoutez un covoiturage</a>
         </div>
+        <p></p>
+        <!--fin de la partie cache si pas conducteur-->
         <?php endif;?>
         <p></p>
         <p></p>
-        <div class="covoiturage_passager">
+        <?php if($info_utilisateur['info_utilisateur']['type_utilisateur'] !== 'Conducteur'):?>
+        <div class="covoiturage_passager_en_cours">
+            <h2>Mes Participation covoiturage en cours</h2>
+            <?php if(empty($info_utilisateur['info_covoiturage_p'])):?>
+                <span>Vous ne participez a aucun covoiturage</span>
+            <?php else:?>
+            <?php foreach ($info_utilisateur['info_covoiturage_c'] as $covoiturage) : ?>
+                <?php if($covoiturage['statut_covoit'] === 'terminer' || $covoiturage['statut_covoit'] === 'annuler'){continue;}?>
 
+                <div class="carte_covoiturage">
+                    <div class="date_covoit">
+                        <span>Le <?= date('d/m/Y',strtotime($covoiturage['date_depart']))?></span>
+                    </div>
+                    <div class="duree_voyage">
+                        <div class="depart_arrive">
+                            <span><?=htmlspecialchars($covoiturage['lieu_depart'])?></span>
+                            <span><?=substr($covoiturage['heure_depart'], 0, 5) ?></span>
+                        </div>
+                        <div class="stick">
+                            <span>----</span>
+                            <span></span>
+                        </div>
+                        <div class="depart_arrive">
+                            <span><?=substr($covoiturage['duree_voyage'], 0, 5) ?></span>
+                            <img class="icone" src="assets/icons/icon_car_profil.png" alt="icone voiture">
+                        </div>
+                        <div class="stick">
+                            <span>----</span>
+                            <span></span>
+                        </div>
+                        <div class="depart_arrive">
+                            <span><?=htmlspecialchars($covoiturage['lieu_arrive'])?></span>
+                            <span><?= date('H:i', strtotime($covoiturage['heure_depart']) + strtotime($covoiturage['duree_voyage']) - strtotime('00:00:00')) ?></span>
+
+                        </div>
+
+                    </div>
+                    <div class="carte_voiture_droit">
+                        <span><?=htmlspecialchars($covoiturage['nb_place_reserve'])?> place<?php echo ($covoiturage['nb_place_reserve']>1)? 's':''; ?> reservée<?php echo ($covoiturage['nb_place_reserve']>1)? 's':''; ?></span>
+                        <?php if($covoiturage['statut_covoit'] === 'planifier'):?>
+                            <form method="POST">
+                                <input type="hidden" name="type_POST" value="annuler_covoiturage">
+                                <input type="hidden" name="id_covoiturage" value="<?=$covoiturage['id_covoiturage']?>">
+                                <button type="submit">Annuler</button>
+                            </form>
+                        <?php elseif($covoiturage['statut_covoit'] === 'en_cours'):?>
+                            <span> Covoiturage en cours</span>
+                        <?php endif;?>
+                    </div>
+                </div>
+            <?php endforeach;?>
+            <?php endif;?>
         </div>
+        <?php endif;?>
+        <p></p>
+        <p></p>                    
+        <div class="div_historique">
+            <!--div historique pour passager et passager conducteur-->
+            <?php if($info_utilisateur['info_utilisateur']['type_utilisateur'] !== 'Conducteur'):?>
+                <div class="historique_passager">
+                    <h2>Mon Historique de participation au covoiturage</h2>
+                    <?php if(empty($info_utilisateur['info_historique_p'])):?>
+                        <span>Vous n'avez participé a aucun covoiturage</span>
+                    <?php else:?>
+                        <?php foreach($info_utilisateur['info_historique_p'] as $h_covoit_p):?>
 
- 
-        </div>     
+                            <div class="carte_covoiturage">
+                                <div class="date_covoit">
+                                    <span>Le <?= date('d/m/Y',strtotime($h_covoit_p['date_depart']))?></span>
+                                </div>
+                                <div class="duree_voyage">
+                                    <div class="depart_arrive">
+                                        <span><?=htmlspecialchars($h_covoit_p['lieu_depart'])?></span>
+                                        <span><?=substr($h_covoit_p['heure_depart'], 0, 5) ?></span>
+                                    </div>
+                                    <div class="stick">
+                                        <span>----</span>
+                                        <span></span>
+                                    </div>
+                                    <div class="depart_arrive">
+                                        <span><?=substr($h_covoit_p['duree_voyage'], 0, 5) ?></span>
+                                        <img class="icone" src="assets/icons/icon_car_profil.png" alt="icone voiture">
+                                    </div>
+                                    <div class="stick">
+                                        <span>----</span>
+                                        <span></span>
+                                    </div>
+                                    <div class="depart_arrive">
+                                        <span><?=htmlspecialchars($h_covoit_p['lieu_arrive'])?></span>
+                                        <span><?= date('H:i', strtotime($h_covoit_p['heure_depart']) + strtotime($h_covoit_p['duree_voyage']) - strtotime('00:00:00')) ?></span>
+
+                                    </div>
+
+                                </div>
+                                <div class="carte_voiture_droit">
+                                    <span><?=htmlspecialchars($h_covoit_p['nb_place_dispo'])?> passager<?php echo ($h_covoit_p['nb_place_dispo']>1)? 's':''; ?></span>
+                                    <?php if($h_covoit_p['statut_covoit'] === 'terminer'):?>
+                                        <a href="donner_avis.php?id_c=<?=$h_covoit_p['id_covoiturage']?>">Donner un avis</a>
+                                    <?php endif;?>
+                                </div>
+                            </div>
+
+                        <?php endforeach;?>
+                    <?php endif;?>
+                </div>
+            <?php endif?>
+
+            <!--div historique pour conducteur et passager conducteur-->
+            <?php if($info_utilisateur['info_utilisateur']['type_utilisateur'] !== 'Passager'):?>
+                <div class="historique_conducteur">
+                    <h2>Mon Historique de covoiturage</h2>
+                    <?php if(empty($info_utilisateur['info_historique_c'])):?>
+                        <span>Vous n'avez terminé aucun covoiturage</span>
+                    <?php else:?>
+                        <?php foreach($info_utilisateur['info_historique_c'] as $h_covoit_c):?>
+
+                            <div class="carte_covoiturage">
+                                <div class="date_covoit">
+                                    <span>Le <?= date('d/m/Y',strtotime($h_covoit_c['date_depart']))?></span>
+                                </div>
+                                <div class="duree_voyage">
+                                    <div class="depart_arrive">
+                                        <span><?=htmlspecialchars($h_covoit_c['lieu_depart'])?></span>
+                                        <span><?=substr($h_covoit_c['heure_depart'], 0, 5) ?></span>
+                                    </div>
+                                    <div class="stick">
+                                        <span>----</span>
+                                        <span></span>
+                                    </div>
+                                    <div class="depart_arrive">
+                                        <span><?=substr($h_covoit_c['duree_voyage'], 0, 5) ?></span>
+                                        <img class="icone" src="assets/icons/icon_car_profil.png" alt="icone voiture">
+                                    </div>
+                                    <div class="stick">
+                                        <span>----</span>
+                                        <span></span>
+                                    </div>
+                                    <div class="depart_arrive">
+                                        <span><?=htmlspecialchars($h_covoit_c['lieu_arrive'])?></span>
+                                        <span><?= date('H:i', strtotime($h_covoit_c['heure_depart']) + strtotime($h_covoit_c['duree_voyage']) - strtotime('00:00:00')) ?></span>
+
+                                    </div>
+
+                                </div>
+                                <div class="carte_voiture_droit">
+                                    <span><?=htmlspecialchars($h_covoit_c['nb_place_dispo'])?> passager<?php echo ($h_covoit_c['nb_place_dispo']>1)? 's':''; ?></span>
+                                    <?php if($h_covoit_c['statut_covoit'] === 'terminer'):?>
+                                        <a href="voir_avis.php?id_c=<?=$h_covoit_c['id_covoiturage']?>">Voir les Avis</a>
+                                    <?php endif;?>
+                                </div>
+                            </div>
+
+                        <?php endforeach;?>
+                    <?php endif;?>
+                </div>
+            <?php endif?>
+        </div>
         <p></p>
         <p></p>
         <p></p>
@@ -287,5 +481,4 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     <?php include 'includes/footer.php' ?>
 
 </body>
-
 </html>

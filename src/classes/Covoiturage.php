@@ -1,5 +1,5 @@
 <?php
-require_once 'function_php/convertir_ville.php';
+require_once 'fonction_php/fonction.php';
 
 class Covoiturage {
 
@@ -15,12 +15,13 @@ class Covoiturage {
             //ON COMMENCE PAR VALIDER LES DONNEES
             $lieu_depart = formaterVille($data['lieu_depart']);
             $lieu_arrive = formaterVille($data['lieu_arrive']);
-            $date_depart = trim($data['date_depart']) ?? '';
+            $date_depart = trim($data['date_depart']);
             $heure_depart = sprintf('%02d:%02d:00', (int)$data['heure_depart'] ?? 0, (int)$data['min_depart'] ?? 0);
             $duree_voyage = sprintf('%02d:%02d:00', (int)$data['duree_voyage_heure'] ?? 0, (int)$data['duree_voyage_min'] ?? 0);
             $prix_personne = $data['prix_personne'] ?? 0;
             $id_voiture = (int)$data['id_voiture'] ?? 0;
 
+            $pdo->beginTransaction();
 
             //PUIS ON VA GERER TOUT LES CAS QUI POSERONS PROBLEME
 
@@ -75,51 +76,53 @@ class Covoiturage {
 
 
             //UNE FOIS TOUT OK INSERTION DU NOUVEAU COVOIT
-            $prep_nouveau_covoit = $pdo->prepare(
-                "INSERT INTO covoiturage
-                (date_depart,
-                heure_depart,
-                duree_voyage,
-                lieu_depart,
-                lieu_arrive,
-                nb_place_dispo,
-                prix_personne,
-                id_conducteur,
-                id_voiture)
-                VALUES (?,?,?,?,?,?,?,?,?)
-            ");
-            $prep_nouveau_covoit->execute(
-            [$date_depart,
-            $heure_depart,
-            $duree_voyage,
-            $lieu_depart,
-            $lieu_arrive,
-            $nb_place_dispo,
-            $prix_personne,
-            $id_utilisateur,
-            $id_voiture
-            ]
-            );
-            $id_covoiturage = $pdo->lastInsertId();
+                $prep_nouveau_covoit = $pdo->prepare(
+                    "INSERT INTO covoiturage
+                    (date_depart,
+                    heure_depart,
+                    duree_voyage,
+                    lieu_depart,
+                    lieu_arrive,
+                    nb_place_dispo,
+                    prix_personne,
+                    id_conducteur,
+                    id_voiture)
+                    VALUES (?,?,?,?,?,?,?,?,?)
+                ");
+                $prep_nouveau_covoit->execute(
+                [$date_depart,
+                $heure_depart,
+                $duree_voyage,
+                $lieu_depart,
+                $lieu_arrive,
+                $nb_place_dispo,
+                $prix_personne,
+                $id_utilisateur,
+                $id_voiture
+                ]
+                );
+                $id_covoiturage = $pdo->lastInsertId();
 
             //MAJ DES CREDIT DU CONDUCTEUR ET DE LA COMMISSION
-            $prep_credit = $pdo->prepare(
-                "UPDATE credit 
-                FROM utilisateur
-                SET credit = credit - ?
-                WHERE id_utilisateur = ?"
-            );
-            $prep_credit->execute([2,$id_utilisateur]);
+                $prep_credit = $pdo->prepare(
+                    "UPDATE utilisateur
+                    SET credit = credit - ?
+                    WHERE id_utilisateur = ?"
+                );
+                $prep_credit->execute([2,$id_utilisateur]);
 
-            $prep_commission = $pdo->prepare(
-                "INSERT INTO commission (id_covoiturage, id_conducteur)
-                VALUES (?,?)
-            ");
-            $prep_commission->execute([$id_covoiturage, $id_utilisateur]);      
+                $prep_commission = $pdo->prepare(
+                    "INSERT INTO commission (id_covoiturage, id_conducteur)
+                    VALUES (?,?)
+                ");
+                $prep_commission->execute([$id_covoiturage, $id_utilisateur]);      
 
+            $pdo->commit();
+            
             return ['success' => true, 'message' => 'Insertion covoiturage'];
 
         } catch (PDOException $e) {
+            $pdo->rollBack();
             error_log($e->getMessage());
             return ['success' => false, 'message' => 'Echec insertion covoiturage'];
         }
@@ -591,16 +594,134 @@ class Covoiturage {
      */
     public static function demarrerCovoiturage (PDO $pdo, int $id_conducteur, int $id_covoiturage): array {
         try{
+            //VERIFICATION QUE LE JOUR POUR DEMARRER EST CORRECT
+                $prep_demarrage_covoit = $pdo->prepare(
+                    "SELECT date_depart, heure_depart
+                    FROM covoiturage
+                    WHERE id_utilisateur = ?
+                    AND id_covoiturage = ?
+                ");
+                $prep_demarrage_covoit->execute([$id_conducteur,$id_covoiturage]);
+                if($prep_demarrage_covoit->rowCount()<1){
+                    return ['success'=>false, 'message'=>'Covoiturage inexistant'];
+                }
+                $date_demarrage = $prep_demarrage_covoit->fetch(PDO::FETCH_ASSOC);
 
-            //demarrage du covoiturage 
+                $depart_covoit = new DateTime($date_demarrage['date_depart'].''.$date_demarrage['heure_depart']);                
+                $maintenant = new DateTime();
+                if($depart_covoit->format('d-m-Y') !== $maintenant->format('d-m-Y') || $depart_covoit<$maintenant){
+                    return ['success' => false, 'message' => 'Il est trop tot pour démarrer le covoiturage'];
+                }
+
+            //DEMARRAGE DU COVOIT
+            //Mis a jour du statut du covoit
+                $prep_maj_statut_covoit = $pdo->prepare(
+                    "UPDATE covoiturage
+                    SET statut_covoit = ?
+                    WHERE id_conducteur = ?
+                    AND id_covoiturage = ?
+                ");
+                $prep_maj_statut_covoit->execute(['en_cours',$id_conducteur,$id_covoiturage]);
+            
             return ['success' => true , 'message' => 'Covoiturage démarré, Bonne route !'];
 
         } catch (PDOException $e){
             error_log($e->getMessage());
             $pdo->rollBack();
-            return ['success'=> false, 'message' => 'Erreur lors de la suppression du covoit'];
+            return ['success'=> false, 'message' => 'Erreur lors du lancement du covoit'];
         }
     }
 
+    /**
+     * permet de valider un covoiturage qui vient davoir lieu
+     * 
+     */
+    public static function terminerCovoiturage (PDO $pdo, int $id_conducteur, int $id_covoiturage){
+        try{
+            //VERIFICATION QUE LE COVOIT A BIEN EU LIEU MAINTENANT
+                $prep_finir_covoit = $pdo->prepare(
+                    "SELECT statut_covoit
+                    FROM covoiturage
+                    WHERE id_utilisateur = ?
+                    AND id_covoiturage = ?
+                ");
+                $prep_finir_covoit->execute([$id_conducteur,$id_covoiturage]);
+                $verif_statut = $prep_finir_covoit->fetch();
+
+                if($verif_statut['statut_covoit'] !== 'en_cours'){
+                    return ['success'=>false, 'message'=>'Erreur covoiturage statut'];
+                }
+            //MIS A JOUR DU STATUT DU COVOIT
+                $prep_maj_statut_covoit = $pdo->prepare(
+                    "UPDATE covoiturage
+                    SET statut_covoit = ?
+                    WHERE id_conducteur = ?
+                    AND id_covoiturage = ?
+                ");
+                $prep_maj_statut_covoit->execute(['terminer',$id_conducteur,$id_covoiturage]);
+
+            //RECUPERATION DES EMAIL DES PARTICIPANTS POUR LES INVITER A NOTER
+                $prep_email = $pdo->prepare(
+                    "SELECT email
+                    FROM utilisateur u
+                    INNER JOIN reservation r ON u.id_utilisateur = r.id_conducteur
+                    WHERE r.id_conducteur = ?
+                    AND r.id_covoiturage = ?
+                    ");
+                $prep_email->execute([$id_conducteur,$id_covoiturage]);
+                $email_passager = $prep_email->fetch(PDO::FETCH_ASSOC);
+
+            return ['success' => true , 'message' => 'Covoiturage terminer !', 'email' => $email_passager];
+
+        } catch (PDOException $e){
+            error_log($e->getMessage());
+            $pdo->rollBack();
+            return ['success'=> false, 'message' => 'Erreur lors de l\'arriver du covoit'];
+        }
+    }
+
+    /**
+     * permet de donner les avis pour le covoiturage
+     */
+    public static function donnerAvis(PDO $pdo, int $id_covoiturage, int $id_passager, array $data){
+        try{
+            //VERIFICATION DES POST
+                $note = $data['note'];
+                $commentaire = trim($data['commentaire']);
+                //de la note
+                if($note<1 || $note>5){
+                    return ['success'=>false, 'message'=>'Erreur à la notation'];
+                }
+                //du commentaire
+                if(isset($commentaire)){
+                    return ['success'=>false, 'message'=>'Erreur veuillez mettre un commentaire'];
+                }
+
+                //recuperation de l'id du condcuteur
+                $prep_conducteur = $pdo->prepare(
+                    "SELECT id_conducteur
+                    FROM covoiturage
+                    WHERE id_covoiturage = ?
+                ");
+                $prep_conducteur->execute([$id_covoiturage]);
+                $id_conducteur = $prep_conducteur->fetch(PDO::FETCH_ASSOC);
+            //INSERTION DANS LA BDD
+            //table avis
+                $prep_avis = $pdo->prepare(
+                    "INSERT INTO avis (commentaire, note, id_passager, id_conducteur, id_covoiturage)
+                    VALUES (?,?,?,?,?)
+                ");
+                $prep_avis->execute([$commentaire,$note,$id_passager,$id_conducteur['id_conducteur'],$id_covoiturage]);
+
+
+        } catch (PDOException $e){
+            error_log($e->getMessage());
+            $pdo->rollBack();
+            return ['success'=> false, 'message' => 'Erreur lors de l\'arriver du covoit'];
+        }
+        
+
+
+    }
 }
 ?>

@@ -104,19 +104,24 @@ class Connexion {
     public static function connexionMonCompte (PDO $pdo, array $data): array {
 
         try {
+            //RECUPERATION DES DONNEES DU POST
+                $identifiant = htmlspecialchars($data['identifiant'] ?? '', ENT_QUOTES, 'UTF-8');
+                $mot_de_passe = $data['mot_de_passe'] ?? '';
 
-            $identifiant = htmlspecialchars($data['identifiant'] ?? '', ENT_QUOTES, 'UTF-8');
-            $mot_de_passe = $data['mot_de_passe'] ?? '';
+            //RECUPERATION DES DONNEES DANS LA BDD
+                $prep_connexion = $pdo->prepare(
+                "SELECT id_utilisateur, pseudo, email, mot_de_passe, statut
+                FROM utilisateur 
+                WHERE pseudo = ? 
+                OR email = ?"
+                );
+                $prep_connexion->execute([$identifiant,$identifiant]);
+                $info_utilisateur = $prep_connexion->fetch(PDO::FETCH_ASSOC);
 
-            //VERIFICATION DES DONNEES
-            $prep_connexion = $pdo->prepare(
-            "SELECT id_utilisateur, pseudo, email, mot_de_passe 
-            FROM utilisateur 
-            WHERE pseudo = ? 
-            OR email = ?"
-            );
-            $prep_connexion->execute([$identifiant,$identifiant]);
-            $info_utilisateur = $prep_connexion->fetch(PDO::FETCH_ASSOC);
+            //VERIFICATION SI LUTILISATEUR NEST PAS SUSPENDU
+                if($info_utilisateur['statut'] === 'suspendu'){
+                    return ['success' => false, 'message' => 'Compte suspendu'];
+                }
 
             if($info_utilisateur && password_verify($mot_de_passe,$info_utilisateur['mot_de_passe'])){
                 return ['success' => true, 'message' => 'Connexion réussi', 'id_utilisateur' => $info_utilisateur['id_utilisateur']];
