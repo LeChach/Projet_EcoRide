@@ -112,20 +112,6 @@ CREATE TABLE reservation (
 );
 
 
-CREATE TABLE validation_trajet (
-    id_validation INT PRIMARY KEY AUTO_INCREMENT,
-    trajet_valide BOOLEAN NOT NULL,
-    probleme BOOLEAN DEFAULT FALSE,
-    commentaire_probleme TEXT,
-    date_validation DATETIME DEFAULT CURRENT_TIMESTAMP,
-    id_conducteur INT NOT NULL,
-    id_passager INT NOT NULL,
-    id_covoiturage INT NOT NULL,
-    FOREIGN KEY (id_passager) REFERENCES  utilisateur (id_utilisateur),
-    FOREIGN KEY (id_conducteur) REFERENCES utilisateur (id_utilisateur),
-    FOREIGN KEY (id_covoiturage) REFERENCES covoiturage (id_covoiturage)
-);
-
 CREATE TABLE commission (
     id_commission INT AUTO_INCREMENT PRIMARY KEY,
     id_covoiturage INT NOT NULL,

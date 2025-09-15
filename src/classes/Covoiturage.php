@@ -147,6 +147,12 @@ class Covoiturage {
                 );
                 $prep_covoit->execute([$id_covoiturage]);
                 $covoit_info = $prep_covoit->fetch(PDO::FETCH_ASSOC);
+
+            //petite verif si le covoit existe tjrs
+                if (!$covoit_info) {
+                    return ['success'=>false, 'message'=>'Covoiturage introuvable'];
+                }
+
             
             $pdo->beginTransaction();
 
@@ -165,13 +171,9 @@ class Covoiturage {
                 $covoit_info['id_conducteur'], 
                 $id_covoiturage]);
 
-
-
-                //CHERCHER SOLDE + COUT CREDIT DE UTILISATEUR POUR MAJ APRES CAR ICI MAJ AVEC VALEUR VIDE   
-
-
-
-
+            //CHERCHER SOLDE + COUT CREDIT DE UTILISATEUR POUR MAJ APRES CAR ICI MAJ AVEC VALEUR VIDE
+                $prix_total = $nb_place_voulu * $covoit_info['prix_personne'];
+                $place_dispo_maj = $covoit_info['nb_place_dispo'] - $nb_place_voulu;
 
             //ON ACTUALISE LE SOLDE DE CREDIT DU PARTICIPANT
                 $prep_credit_passager = $pdo->prepare(
@@ -181,9 +183,10 @@ class Covoiturage {
 
             //ON MET A JOUR LE NOMBRE DE PLACE DISPO DANS COVOITURAGE
                 $prep_places = $pdo->prepare(
-                "UPDATE covoiturage SET nb_place_dispo = ?"
+                "UPDATE covoiturage SET nb_place_dispo = ?
+                WHERE id_covoiturage = ? "
                 );
-                $prep_places->execute([$place_dispo_maj]);
+                $prep_places->execute([$place_dispo_maj, $id_covoiturage]);
 
             //ON PREPARE LE SOLDE DE CREDIT DU CONDUCTEUR
                 $prep_virement = $pdo->prepare(
@@ -191,14 +194,16 @@ class Covoiturage {
                 (montant_virement, 
                 statut, 
                 id_passager, 
-                id_conducteur)
-                VALUES (?,?,?,?)"
+                id_conducteur,
+                id_covoiturage)
+                VALUES (?,?,?,?,?)"
                 );
                 $prep_virement->execute(
                 [$prix_total, 
                 'en_attente', 
                 $id_utilisateur, 
-                $covoit_info['id_conducteur']]
+                $covoit_info['id_conducteur'],
+                $id_covoiturage]
                 );
 
             //ON CREER LE VIREMENT INSTANTANEE DU PASSAGER
@@ -207,13 +212,15 @@ class Covoiturage {
                 (montant_virement,
                 statut, 
                 id_passager, 
-                id_conducteur)
-                VALUES (?,?,?,?)"
+                id_conducteur,
+                id_covoiturage)
+                VALUES (?,?,?,?,?)"
                 );
                 $prep_virement_passager->execute(
                 [$prix_total,'valider', 
                 $id_utilisateur, 
-                $covoit_info['id_conducteur']]
+                $covoit_info['id_conducteur'],
+                $id_covoiturage]
                 );
 
             $pdo->commit();
@@ -661,7 +668,7 @@ class Covoiturage {
                 $prep_demarrage_covoit = $pdo->prepare(
                     "SELECT date_depart, heure_depart
                     FROM covoiturage
-                    WHERE id_utilisateur = ?
+                    WHERE id_conducteur = ?
                     AND id_covoiturage = ?
                 ");
                 $prep_demarrage_covoit->execute([$id_conducteur,$id_covoiturage]);
@@ -672,9 +679,10 @@ class Covoiturage {
 
                 $depart_covoit = new DateTime($date_demarrage['date_depart'].''.$date_demarrage['heure_depart']);                
                 $maintenant = new DateTime();
-                if($depart_covoit->format('d-m-Y') !== $maintenant->format('d-m-Y') || $depart_covoit<$maintenant){
-                    return ['success' => false, 'message' => 'Il est trop tot pour démarrer le covoiturage'];
+                if ($depart_covoit > $maintenant) {
+                    return ['success' => false, 'message' => 'Il est trop tôt pour démarrer le covoiturage'];
                 }
+
 
             //DEMARRAGE DU COVOIT
             //Mis a jour du statut du covoit
@@ -690,7 +698,6 @@ class Covoiturage {
 
         } catch (PDOException $e){
             error_log($e->getMessage());
-            $pdo->rollBack();
             return ['success'=> false, 'message' => 'Erreur lors du lancement du covoit'];
         }
     }
@@ -705,7 +712,7 @@ class Covoiturage {
                 $prep_finir_covoit = $pdo->prepare(
                     "SELECT statut_covoit
                     FROM covoiturage
-                    WHERE id_utilisateur = ?
+                    WHERE id_conducteur = ?
                     AND id_covoiturage = ?
                 ");
                 $prep_finir_covoit->execute([$id_conducteur,$id_covoiturage]);
@@ -723,16 +730,25 @@ class Covoiturage {
                 ");
                 $prep_maj_statut_covoit->execute(['terminer',$id_conducteur,$id_covoiturage]);
 
+            //ET DES RESERVATIONS
+                $prep_maj_reservation = $pdo->prepare(
+                    "UPDATE reservation
+                    SET statut_reservation = ?
+                    WHERE id_covoiturage = ?"
+                );
+                $prep_maj_reservation->execute(['terminer', $id_covoiturage]);
+
+
             //RECUPERATION DES EMAIL DES PARTICIPANTS POUR LES INVITER A NOTER
                 $prep_email = $pdo->prepare(
                     "SELECT email
                     FROM utilisateur u
-                    INNER JOIN reservation r ON u.id_utilisateur = r.id_conducteur
+                    INNER JOIN reservation r ON u.id_utilisateur = r.id_passager
                     WHERE r.id_conducteur = ?
                     AND r.id_covoiturage = ?
                     ");
                 $prep_email->execute([$id_conducteur,$id_covoiturage]);
-                $email_passager = $prep_email->fetch(PDO::FETCH_ASSOC);
+                $email_passager = $prep_email->fetchAll(PDO::FETCH_COLUMN);
 
             return ['success' => true , 'message' => 'Covoiturage terminer !', 'email' => $email_passager];
 
@@ -755,12 +771,8 @@ class Covoiturage {
                 if($note<1 || $note>5){
                     return ['success'=>false, 'message'=>'Erreur à la notation'];
                 }
-                //du commentaire
-                if(isset($commentaire)){
-                    return ['success'=>false, 'message'=>'Erreur veuillez mettre un commentaire'];
-                }
 
-                //recuperation de l'id du condcuteur
+            //recuperation de l'id du condcuteur
                 $prep_conducteur = $pdo->prepare(
                     "SELECT id_conducteur
                     FROM covoiturage
@@ -768,6 +780,22 @@ class Covoiturage {
                 ");
                 $prep_conducteur->execute([$id_covoiturage]);
                 $id_conducteur = $prep_conducteur->fetch(PDO::FETCH_ASSOC);
+
+            // Vérification si un avis existe déjà
+                $prep_verif = $pdo->prepare(
+                    "SELECT COUNT * as nb_avis
+                    FROM avis
+                    WHERE id_passager = ? 
+                    AND id_covoiturage = ?
+                    AND id_conducteur = ?"
+                );
+                $prep_verif->execute([$id_passager, $id_covoiturage, $id_conducteur['id_conducteur']]);
+                $dejaDonne = $prep_verif->fetch();
+
+            if ($dejaDonne['nb_avis']>0) {
+                return ['success' => false, 'message' => 'Vous avez déjà donné un avis pour ce covoiturage'];
+            }
+                
             //INSERTION DANS LA BDD
             //table avis
                 $prep_avis = $pdo->prepare(

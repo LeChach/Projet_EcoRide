@@ -70,7 +70,6 @@ body {
 .carte_covoiturage{
     display: flex;
     justify-content: space-between;
-    width: 60%;
     border: solid
 
 }
@@ -88,10 +87,7 @@ body {
     justify-content: space-between;
 }
 
-.div_historique{
-    display: flex;
-    justify-content: space-between;
-}
+
     
 
 /*----------------AJOUTER VOITURE--------------*/

@@ -17,7 +17,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
             break;
 
         case 'confirmation_participation':
-            $confirmation = Covoiturage::participerCovoiturage($pdo,$id_utilisateur,$_POST['id_covoituage'],$_POST['nb_place']);
+            $confirmation = Covoiturage::participerCovoiturage($pdo,$id_utilisateur,$_POST['id_covoiturage'],$_POST['nb_place']);
             if($confirmation['success']){
                 $_SESSION['covoiturage_participé'] = $confirmation['message'];
                 header('Location: recherche.php');

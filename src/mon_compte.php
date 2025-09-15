@@ -3,16 +3,23 @@ require_once 'connexion/log.php';
 require_once 'connexion/session_prive.php';
 require_once 'classes/MonCompte.php';
 require_once 'classes/Connexion.php';
+require_once 'classes/Covoiturage.php';
 require_once 'fonction_php/fonction.php';
 
 
 $info_utilisateur = MonCompte::recupDonnee($pdo,$id_utilisateur);
+
 if(!$info_utilisateur['success']){
     $_SESSION['erreur_connexion'] = $info_utilisateur['message'];
     session_destroy();
     header('location: connexion.php');
     exit;
 }
+
+//besoin de gerer la participation des covoit a cause du annuler
+$covoit_planifier_encours = array_filter($info_utilisateur['info_covoiturage_p'], function($c){
+    return $c['statut_covoit'] === 'en_cours' || $c['statut_covoit'] === 'planifier';
+});
 
 //gestion des differents POST
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
@@ -87,8 +94,20 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
             header('Location: mon_compte.php');
             exit;
 
-        case 'donner_avis':
-
+        case 'ajouter_avis':
+            $fonction = Covoiturage::donnerAvis($pdo,$_POST['id_covoiturage'],$id_utilisateur,$_POST);
+            if(!$fonction['success']){
+                $_SESSION['erreur'] = $fonction['message'];
+            }
+            header('Location: mon_compte.php');
+            exit;
+        case 'valider_avis':
+            $fonction = MonCompte::changerAvis($pdo,$_POST['id_avis'],$_POST);
+            if(!$fonction['success']){
+                $_SESSION['erreur'] = $fonction['message'];
+            }
+            header('Location: mon_compte.php');
+            exit;
         default:
             header('Location: mon_compte.php');
             exit;
@@ -142,7 +161,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                     </div>
                     <div class="info_ligne">
                         <span>Crédit :</span>
-                        <span><?= htmlspecialchars($info_utilisateur['info_utilisateur']['credit'])?>€</span>
+                        <span><?= htmlspecialchars($info_utilisateur['info_utilisateur']['credit'])?></span>
                     </div>
                 </div>
 
@@ -156,6 +175,14 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                 <button type="submit">se déconnecter</button>
             </form>
         </div>
+        <p></p>
+        <p></p>
+        <?php if ($info_utilisateur['info_role']['libelle'] === 'Employe'):?>
+        <div class="employe">
+           <span><?= htmlspecialchars($info_utilisateur['info_avis_attente']['nb_attente'])?> avis en attente de validation</span> 
+           <a href="gerer_avis.php">Voir et gérer</a>
+        </div>
+        <?php endif;?>
         <p></p>
         <p></p>
         <div class="type_utilisateur">
@@ -191,11 +218,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                     <input type="hidden" name="type_POST" value="MAJ_preferences">
 
                     <?php foreach ($info_utilisateur['info_preference'] as $preference => $valeur_pref):?>
-                        <?php if($preference === 'ladies_only'):?>
-                            <?php if($info_utilisateur['info_utilisateur']['sexe'] !== 'Femme'):?>
-                                <?php continue;?> 
-                            <?php endif;?>
-                        <?php endif;?>
                             <img class="icone" src="<?= cheminImgPreference($preference)?>" alt="<?= htmlspecialchars($preference)?>">
                             <span><?= htmlspecialchars($preference) ?></span>
                             <input type="checkbox" name="<?=htmlspecialchars($preference)?>" value="accepter" <?php echo ($valeur_pref == 'accepter') ? 'checked' : ''; ?>><br>
@@ -289,7 +311,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
 
                     </div>
                     <div class="carte_voiture_droit">
-                        <span><?=htmlspecialchars($covoiturage['nb_place_dispo'])?> passager<?php echo ($covoiturage['nb_place_dispo']>1)? 's':''; ?></span>
+                        <span><?=htmlspecialchars($covoiturage['nb_place_dispo'])?> place disponible<?php echo ($covoiturage['nb_place_dispo']>1)? 's':''; ?></span>
                         <?php if($covoiturage['statut_covoit'] === 'planifier'):?>
                             <form method="POST">
                                 <input type="hidden" name="type_POST" value="demarrer_covoiturage">
@@ -322,10 +344,10 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
         <?php if($info_utilisateur['info_utilisateur']['type_utilisateur'] !== 'Conducteur'):?>
         <div class="covoiturage_passager_en_cours">
             <h2>Mes Participation covoiturage en cours</h2>
-            <?php if(empty($info_utilisateur['info_covoiturage_p'])):?>
+            <?php if(empty($covoit_planifier_encours)):?>
                 <span>Vous ne participez a aucun covoiturage</span>
             <?php else:?>
-            <?php foreach ($info_utilisateur['info_covoiturage_c'] as $covoiturage) : ?>
+            <?php foreach ($covoit_planifier_encours as $covoiturage) : ?>
                 <?php if($covoiturage['statut_covoit'] === 'terminer' || $covoiturage['statut_covoit'] === 'annuler'){continue;}?>
 
                 <div class="carte_covoiturage">
@@ -414,10 +436,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
 
                                 </div>
                                 <div class="carte_voiture_droit">
-                                    <span><?=htmlspecialchars($h_covoit_p['nb_place_dispo'])?> passager<?php echo ($h_covoit_p['nb_place_dispo']>1)? 's':''; ?></span>
+                                    <span><?=htmlspecialchars($h_covoit_p['nb_place_reserve'])?> passager<?php echo ($h_covoit_p['nb_place_reserve']>1)? 's':''; ?></span>
+                                    <span><?=htmlspecialchars($h_covoit_p['statut_covoit'])?></span>
                                     <?php if($h_covoit_p['statut_covoit'] === 'terminer'):?>
                                         <a href="donner_avis.php?id_c=<?=$h_covoit_p['id_covoiturage']?>">Donner un avis</a>
                                     <?php endif;?>
+                                    
                                 </div>
                             </div>
 
@@ -465,6 +489,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                                 </div>
                                 <div class="carte_voiture_droit">
                                     <span><?=htmlspecialchars($h_covoit_c['nb_place_dispo'])?> passager<?php echo ($h_covoit_c['nb_place_dispo']>1)? 's':''; ?></span>
+                                    <span><?=htmlspecialchars($h_covoit_c['statut_covoit'])?></span>
                                     <?php if($h_covoit_c['statut_covoit'] === 'terminer'):?>
                                         <a href="voir_avis.php?id_c=<?=$h_covoit_c['id_covoiturage']?>">Voir les Avis</a>
                                     <?php endif;?>

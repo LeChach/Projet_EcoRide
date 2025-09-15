@@ -67,31 +67,47 @@ class MonCompte {
                 );
                 $prep_covoit_passager->execute([$id_utilisateur]);
                 $covoit_passager = $prep_covoit_passager->fetchAll(PDO::FETCH_ASSOC);
-
-
-            //PREPARATION DE LHISTORIQUE CONDUCTEUR
-                $prep_historique_conducteur = $pdo->prepare(
-                    "SELECT c.*, a.*
-                    FROM covoiturage c 
-                    INNER JOIN avis a ON c.id_covoiturage=a.id_covoiturage
+           
+            //PREPARATION DE LHISTORIQUE DU CONDUCTEUR
+                $prep_historique_c = $pdo->prepare(
+                    "SELECT c.*,a.*
+                    FROM covoiturage c
+                    LEFT JOIN avis a ON c.id_covoiturage = a.id_covoiturage
                     WHERE c.id_conducteur = ?
                     AND (c.statut_covoit = ? OR c.statut_covoit = ?)
-                    AND a.statut_avis = ?
                 ");
-                $prep_historique_conducteur->execute([$id_utilisateur,'terminer','annuler','valider']);
-                $info_historique_c = $prep_historique_conducteur->fetchALL();
-            //PREPARATION DE LHISTORIQUE PASSAGER
-                $prep_historique_passager = $pdo->prepare(
-                "SELECT c.*, a.*
-                FROM covoiturage c 
-                INNER JOIN avis a ON c.id_covoiturage = a.id_covoiturage
-                INNER JOIN reservation r ON c.id_covoiturage = r.id_covoiturage
-                WHERE r.id_passager = ?
-                AND (c.statut_covoit = ? OR c.statut_covoit = ?) 
-                AND a.statut_avis = ?
+                $prep_historique_c->execute([$id_utilisateur,'annuler','terminer']);
+                $historique_c = $prep_historique_c->fetchAll();
+
+            //PREPARATION DE LHISTORIQUE DU PASSAGER
+                $prep_historique_p = $pdo->prepare(
+                    "SELECT c.*, a.*, r.*
+                    FROM covoiturage c
+                    INNER JOIN reservation r ON c.id_covoiturage = r.id_covoiturage
+                    LEFT JOIN avis a ON c.id_covoiturage = a.id_covoiturage 
+                    AND a.statut_avis = 'valider'
+                    WHERE r.id_passager = ?
+                    AND (c.statut_covoit = ? OR c.statut_covoit = ?)"
+                );
+                $prep_historique_p->execute([$id_utilisateur, 'terminer', 'annuler']);
+                $historique_p = $prep_historique_p->fetchAll(PDO::FETCH_ASSOC);
+            //RECUPERATION DU ROLE DE LUTILISATEUR
+                $prep_role = $pdo->prepare(
+                    "SELECT libelle
+                    FROM role r INNER JOIN possede p ON r.id_role = p.id_role
+                    WHERE p.id_utilisateur = ?
                 ");
-                $prep_historique_passager->execute([$id_utilisateur,'terminer','annuler','valider']);
-                $info_historique_p = $prep_historique_passager->fetchALL();
+                $prep_role->execute([$id_utilisateur]);
+                $role = $prep_role->fetch();
+            //RECUPERATION DU NOMBRE DAVIS EN ATTENTE POUR EMPLOYE
+                $prep_avis_attente = $pdo->prepare(
+                    "SELECT COUNT(*) as nb_attente 
+                    FROM avis 
+                    WHERE statut_avis = 'en_attente'"
+                );
+                $prep_avis_attente->execute();
+                $nb_attente = $prep_avis_attente->fetch(PDO::FETCH_ASSOC);
+
             //RETURN
             return ['success' => true, 
                     'message' => 'Donnée correctement récupérer',
@@ -100,8 +116,10 @@ class MonCompte {
                     'info_voiture' => $voitures_utilisateur,
                     'info_covoiturage_c' => $covoit_conducteur,
                     'info_covoiturage_p' => $covoit_passager,
-                    'info_historique_c' => $info_historique_c,
-                    'info_historique_p' => $info_historique_p
+                    'info_historique_c' => $historique_c,
+                    'info_historique_p'=> $historique_p,
+                    'info_role' => $role,
+                    'info_avis_attente' => $nb_attente                  
             ];
 
         } catch (PDOException $e) {
@@ -305,8 +323,79 @@ class MonCompte {
             return ['success' => false, 'message' => 'Echec du changement des données'];
         }
     }
+ 
+    /**
+     * 
+     */
+    public static function voirAvis (PDO $pdo, int $id_utilisateur, $id_covoiturage): array {
+        try{
+            //PERMET DE RECUPERER LES AVIS DU CONDUCTEUR
+            $prep_avis_c = $pdo->prepare(
+                "SELECT a.note, a.commentaire, u.pseudo, u.photo
+                FROM avis a
+                INNER JOIN utilisateur u ON a.id_passager = u.id_utilisateur
+                WHERE a.id_covoiturage = ?
+                AND a.id_conducteur = ?
+                AND a.statut_avis = 'valider'
+            "); 
+            $prep_avis_c->execute([$id_covoiturage,$id_utilisateur]);
+            $avis = $prep_avis_c->fetchAll();
 
+            return ['success' => true, 'message' => 'avis chargés', 'avis' => $avis];
 
+        } catch (PDOException $e) {
+        error_log($e->getMessage());
+        return ['success' => false, 'message' => 'Echec des données des avis'];
+        }
+    }
+
+    /**
+     *  GERER AVIS RETURN FAUX A CORIGER
+     */
+    public static function chargerAvis(PDO $pdo, int $id_utilisateur): array {
+        try{
+            //verification que cest bien un employe
+                $prep_role = $pdo->prepare(
+                    "SELECT libelle
+                    FROM role r INNER JOIN possede p ON r.id_role p.id_role
+                    WHERE p.id_utilisateur = ?
+                ");
+                $prep_role->execute([$id_utilisateur]);
+                $role = $prep_role->fetch();
+                if($role['libelle'] !== 'Employe'){
+                    return ['success' => false, 'message' => 'Seulement les employés peuvent valider les avis'];
+                }
+
+                $prep_avis = $pdo->prepare(
+                    "SELECT a.id_avis, a.commentaire, a.note, u.pseudo, c.date_depart
+                    FROM avis a
+                    INNER JOIN utilisateur u ON a.id_passager = u.id_utilisateur
+                    INNER JOIN covoiturage c ON a.id_covoiturage = c.id_covoiturage
+                    WHERE a.statut_avis = 'en_attente'"
+                );
+                $prep_avis->execute();
+                $avis_attente = $prep_avis->fetchAll(PDO::FETCH_ASSOC);
+
+                return ['success' => true, 'message' => 'Avis chargé', 'avis' => $avis_attente];
+
+        } catch (PDOException $e) {
+        error_log($e->getMessage());
+        return ['success' => false, 'message' => 'Echec des données des avis'];
+        }
+    }
+
+    /**
+     * 
+     */
+    public static function changerAvis(PDO $pdo,int $id_avis,array $data){
+        $validation = $data['validation'];
+        $prep = $pdo->prepare(
+            "UPDATE avis 
+            SET statut_avis = ? 
+            WHERE id_avis = ?
+        ");
+        $prep->execute([$validation,$id_avis]);
+    }
 }
 
 ?>

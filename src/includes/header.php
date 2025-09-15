@@ -8,7 +8,7 @@
             <ul>
                 <li><a href="index.php">Accueil</a></li>
                 <li><a href="recherche.php" id="recherche_covoit">Covoiturage</a> </li>
-                <li id="contact">Contact</li>
+                <li><a href="contact.php" id="contact">Contact</li>
             </ul>
         </nav>
 

@@ -2,8 +2,8 @@
 require_once 'connexion/log.php';
 require_once 'connexion/session_prive.php';
 
-$id_covoiruage = $_GET['id_c']??null;
-if($id_covoiruage === null){
+$id_covoiturage = $_GET['id_c']??null;
+if($id_covoiturage === null){
     $_SESSION['erreur_avis'] = 'Covoiturage non trouvé';
     header("Location: mon_compte.php");
     exit;
@@ -52,28 +52,27 @@ if($id_covoiruage === null){
 <body>
 
     <?php include 'includes/header.php' ?>
-
     <form method="POST" action="mon_compte.php">
-    <div class="rating-section">
-        <label>Votre note :</label>
-        <div class="rating-stars" id="rating">
-            <img src="assets/icons/Star_black.png" class="star" data-rating="1" alt="1 étoile">
-            <img src="assets/icons/Star_black.png" class="star" data-rating="2" alt="2 étoiles">
-            <img src="assets/icons/Star_black.png" class="star" data-rating="3" alt="3 étoiles">
-            <img src="assets/icons/Star_black.png" class="star" data-rating="4" alt="4 étoiles">
-            <img src="assets/icons/Star_black.png" class="star" data-rating="5" alt="5 étoiles">
+
+        <div class="rating-section">
+            <label>Votre note :</label>
+            <div class="rating-stars" id="rating">
+                <img src="assets/icons/Star_black.png" class="star" data-rating="1" alt="1 étoile">
+                <img src="assets/icons/Star_black.png" class="star" data-rating="2" alt="2 étoiles">
+                <img src="assets/icons/Star_black.png" class="star" data-rating="3" alt="3 étoiles">
+                <img src="assets/icons/Star_black.png" class="star" data-rating="4" alt="4 étoiles">
+                <img src="assets/icons/Star_black.png" class="star" data-rating="5" alt="5 étoiles">
+            </div>
+            <input type="hidden" name="note" id="note-input" value="1">
+            <span id="note-text">Très mauvais</span>
         </div>
-        <input type="hidden" name="note" id="note-input" value="1">
-        <input type="hidden" name="id_covoiturage" value="<?= $id_covoiruage?>">
+        
+        <textarea name="commentaire" placeholder="Votre commentaire..."></textarea>
 
-
-        <span id="note-text">Très mauvais</span>
-    </div>
-    
-    <textarea name="commentaire" placeholder="Votre commentaire..."></textarea>
-    <input type="hidden" name="id_covoiturage" value="<?=$id_covoiruage?>">
-    <button type="submit">Envoyer l'évaluation</button>
-</form>
+        <input type="hidden" name="type_POST" value="ajouter_avis">
+        <input type="hidden" name="id_covoiturage" value="<?=$id_covoiturage?>">
+        <button type="submit">Envoyer l'évaluation</button>
+    </form>
 
     <?php include 'includes/footer.php' ?>
 
