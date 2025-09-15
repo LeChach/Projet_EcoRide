@@ -26,6 +26,17 @@ unset($_SESSION['erreur_avis']);
 
 
 
+$participation_ok = $_SESSION['covoiturage_participé']??null;
+unset($_SESSION['covoiturage_participé']);
+
+$erreur_participation = $_SESSION['erreur_participation']??null;
+unset($_SESSION['erreur_participation']);
+
+
+
+
+
+
 
 $recherche_covoit = $_SESSION['recherche_covoit'] ?? null;
 unset($_SESSION['recherche_covoit']);

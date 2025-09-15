@@ -2,7 +2,7 @@
 require_once 'connexion/log.php';
 require_once 'connexion/session.php';
 require_once 'classes/Covoiturage.php';
-require_once 'function_php/img_preference.php';
+require_once 'fonction_php/fonction.php';
 
     $id_covoit = (int)$_GET['id'] ?? 0;
     $lieu_depart = $_GET['lieu_depart'];

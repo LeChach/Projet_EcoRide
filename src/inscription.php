@@ -41,14 +41,16 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                 <fieldset>
                     <legend>Je suis :</legend>
 
-                    <input type="radio" name="sexe" value="Homme" required>
-                    <label for="Homme">un Homme</label><br>
                     
-                    <input type="radio" name="sexe" value="Femme" required>
-                    <label for="Femme">une Femme</label><br>
+                    <label for="Homme">un Homme
+                    <input type="radio" name="sexe" value="Homme" required></label><br>
+                    
+                    <label for="Femme">une Femme
+                    <input type="radio" name="sexe" value="Femme" required></label><br>
 
-                    <input type="radio" name="sexe" value="Non précisé" required>
-                    <label for="Non précisé">Je préfère ne pas préciser</label><br>
+                    <label for="Non précisé">Je préfère ne pas préciser
+                    <input type="radio" name="sexe" value="Non précisé" required></label><br>
+
 
                 </fieldset>            
 
@@ -63,7 +65,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                 <input type="password" id="password" name="password" required
                 pattern="(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}"
                 title="Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial">
-                >
 
                 <label for="phone">Téléphone :</label>
                 <input type="tel" id="phone" name="phone" required>

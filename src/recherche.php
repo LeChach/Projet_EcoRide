@@ -1,7 +1,7 @@
 <?php
 require_once 'connexion/log.php';
 require_once 'connexion/session.php';
-require_once 'function_php/convertir_ville.php';
+require_once 'fonction_php/fonction.php';
 require_once 'classes/Covoiturage.php';
 
 
@@ -14,7 +14,6 @@ $nb_places_voulu_par_le_passager = $_GET['nb_place'] ?? 1;
 if ($lieu_depart && $lieu_arrive && $date_depart) {
     $recherche_covoit = Covoiturage::rechercheCovoiturage($pdo,$lieu_depart,$lieu_arrive,$date_depart,$nb_places_voulu_par_le_passager);
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -171,10 +170,15 @@ if ($lieu_depart && $lieu_arrive && $date_depart) {
     <?php include 'includes/header.php' ?>
     <?php include 'includes/bar_recherche.php' ?>
 
+    <?php if ($participation_ok): ?>
+        <p style="color:green;"><?= htmlspecialchars($participation_ok) ?></p>
+    <?php elseif ($erreur_participation): ?>
+        <p style="color:red;"><?= htmlspecialchars($erreur_participation) ?></p>
+    <?php endif;?>
+
     <?php if ($recherche_covoit && !empty($recherche_covoit['info_covoiturage'])) : ?>
         <div class="recherche">
             <div class="filtre">
-                <!-- Zone de filtres (facultative pour l’instant) -->
             </div>
 
             <div class="resultat_covoit">
@@ -198,7 +202,7 @@ if ($lieu_depart && $lieu_arrive && $date_depart) {
 
                         <div class="div_covoit">
                             <div class="date_covoit">
-                                <p><?= htmlspecialchars($covoit['c_date_depart']) ?></p>
+                                <span>Le <?= date('d/m/Y',strtotime($covoit['c_date_depart']))?></span>
                             </div>
                             <div class="trajet">
                                 <div class="lieu_duree">
@@ -207,7 +211,7 @@ if ($lieu_depart && $lieu_arrive && $date_depart) {
                                     <p><?= htmlspecialchars($covoit['c_lieu_arrive']) ?></p>
                                 </div>
                                 <div class="heure">
-                                    <p><?= htmlspecialchars($covoit['c_heure_depart']) ?></p>
+                                    <p><?= htmlspecialchars($covoit['c_heure_depart']) ?></p>       
                                     <p>
                                         <?php 
                                         $heure_depart = strtotime($covoit['c_heure_depart']);
@@ -219,7 +223,7 @@ if ($lieu_depart && $lieu_arrive && $date_depart) {
                             </div>
                             <div class="nb_dtl_supp">
                                 <span><?= htmlspecialchars($covoit['c_prix_personne'])?> € </span>
-                                <span><?= htmlspecialchars($covoit['c_nb_place_dispo'])?> Places Disponibles </span>
+                                <span><?= htmlspecialchars($covoit['c_nb_place_dispo'])?> Place<?= ($covoit['c_nb_place_dispo'] > 1) ?'s':''?> Disponible <?= ($covoit['c_nb_place_dispo'] > 1) ?'s':''?> </span>
                                 <a href="detail.php
                                         ?id=<?= $covoit['c_id'] ?>
                                         &lieu_depart=<?= urlencode($_GET['lieu_depart']) ?>
@@ -228,10 +232,10 @@ if ($lieu_depart && $lieu_arrive && $date_depart) {
                                         &nb_place=<?= urlencode($_GET['nb_place']) ?>">
                                 Détails</a>
                                 <form action="participation_covoit.php" method="POST">
-                                    <input name="id_utilisateur" type="hidden" value="<?= $id_utilisateur ?? '' ?>">
+                                    <input type="hidden" name="type_POST" value="affichage_double_participation">
                                     <input name="id_covoiturage" type="hidden" value="<?= $covoit['c_id'] ?>">
-                                    <input type="hidden" name="nb_places" value="<?= $_POST['nb_place'] ?? 1 ?>">
-                                    <button>Participer</button>
+                                    <input name="nb_place" type="hidden" value="<?= $nb_places_voulu_par_le_passager ?>">
+                                    <button type="submit">Participer</button>
                                 </form>
                             </div>
                         </div>

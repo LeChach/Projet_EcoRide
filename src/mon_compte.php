@@ -142,7 +142,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                     </div>
                     <div class="info_ligne">
                         <span>Crédit :</span>
-                        <span><?= htmlspecialchars($info_utilisateur['info_utilisateur']['credit'])?></span>
+                        <span><?= htmlspecialchars($info_utilisateur['info_utilisateur']['credit'])?>€</span>
                     </div>
                 </div>
 
@@ -191,6 +191,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                     <input type="hidden" name="type_POST" value="MAJ_preferences">
 
                     <?php foreach ($info_utilisateur['info_preference'] as $preference => $valeur_pref):?>
+                        <?php if($preference === 'ladies_only'):?>
+                            <?php if($info_utilisateur['info_utilisateur']['sexe'] !== 'Femme'):?>
+                                <?php continue;?> 
+                            <?php endif;?>
+                        <?php endif;?>
                             <img class="icone" src="<?= cheminImgPreference($preference)?>" alt="<?= htmlspecialchars($preference)?>">
                             <span><?= htmlspecialchars($preference) ?></span>
                             <input type="checkbox" name="<?=htmlspecialchars($preference)?>" value="accepter" <?php echo ($valeur_pref == 'accepter') ? 'checked' : ''; ?>><br>
