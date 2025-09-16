@@ -17,9 +17,13 @@ require_once 'connexion/session.php';
 <body>
     <?php include 'includes/header.php' ?>
 
+    <main>
+
     <section class="hero">
         <h1>Partageons la route, Protégeons notre avenir</h1>
-        <?php include 'includes/bar_recherche.php'?>
+        <div class ="bar_recherche_wrapper" >
+            <?php include 'includes/bar_recherche.php'?>
+        </div>
     </section>
 
     <section class="information">
@@ -56,7 +60,7 @@ require_once 'connexion/session.php';
                 <img src="assets/icons/economie.png" alt="icone économie">
                 <h3>Économie</h3>
                 <p>
-                    Réduisez Réduisez vos frais de transport
+                    Réduisez vos frais de transport
                 </p>
             </div>
             <div class="communautaire">
@@ -69,10 +73,9 @@ require_once 'connexion/session.php';
         </div>
     </section>
 
+    </main>
+
     <?php include 'includes/footer.php' ?>
 
-    <script>
-        document.getElementById('date_auj').value = new Date().toISOString().split('T')[0];
-    </script>
 </body>
 </html>

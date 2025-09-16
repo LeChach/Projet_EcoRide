@@ -350,14 +350,14 @@ class MonCompte {
     }
 
     /**
-     *  GERER AVIS RETURN FAUX A CORIGER
+     * 
      */
     public static function chargerAvis(PDO $pdo, int $id_utilisateur): array {
         try{
             //verification que cest bien un employe
                 $prep_role = $pdo->prepare(
                     "SELECT libelle
-                    FROM role r INNER JOIN possede p ON r.id_role p.id_role
+                    FROM role r INNER JOIN possede p ON r.id_role = p.id_role
                     WHERE p.id_utilisateur = ?
                 ");
                 $prep_role->execute([$id_utilisateur]);
@@ -371,10 +371,10 @@ class MonCompte {
                     FROM avis a
                     INNER JOIN utilisateur u ON a.id_passager = u.id_utilisateur
                     INNER JOIN covoiturage c ON a.id_covoiturage = c.id_covoiturage
-                    WHERE a.statut_avis = 'en_attente'"
+                    WHERE a.statut_avis = ?"
                 );
-                $prep_avis->execute();
-                $avis_attente = $prep_avis->fetchAll(PDO::FETCH_ASSOC);
+                $prep_avis->execute(['en_attente']);
+                $avis_attente = $prep_avis->fetchAll();
 
                 return ['success' => true, 'message' => 'Avis chargé', 'avis' => $avis_attente];
 
@@ -388,14 +388,62 @@ class MonCompte {
      * 
      */
     public static function changerAvis(PDO $pdo,int $id_avis,array $data){
-        $validation = $data['validation'];
-        $prep = $pdo->prepare(
-            "UPDATE avis 
-            SET statut_avis = ? 
-            WHERE id_avis = ?
-        ");
-        $prep->execute([$validation,$id_avis]);
-    }
+        try{
+            //CONTIENT LE NOUVEAU STATUT DE VALIDATION
+                $validation = $data['validation'];
+
+            //SI VALIDER ON CHANGER LA NOTE Du conducteur
+            if($validation === 'valider'){
+                //on va chercher son id 
+                    $prep_conducteur = $pdo->prepare(
+                        "SELECT id_conducteur, note
+                        FROM avis
+                        WHERE id_avis = ?
+                    ");
+                    $prep_conducteur->execute([$id_avis]);
+                    $avis_conducteur = $prep_conducteur->fetch(PDO::FETCH_ASSOC);
+                //puis on modifie sa note
+                    $prep_note = $pdo->prepare(
+                        "SELECT note
+                        FROM utilisateur 
+                        WHERE id_utilisateur = ?
+                    ");
+                    $prep_note->execute([$avis_conducteur['id_conducteur']]);
+                    $note_conducteur = $prep_note->fetch(PDO::FETCH_ASSOC);
+                //on calcul la nouvelle note
+                        //cas lorsque le conducteur n'a jamais eu de note
+                    if($note_conducteur['note'] === null){
+                        $new_note = $avis_conducteur['note'];
+                    }else{
+                        $new_note = ($note_conducteur['note'] + $avis_conducteur['note'])/2;
+                    }
+                    if($new_note<=0){
+                        return ['success'=>false,'message'=>'erreur lors de la note du conducteur'];
+                    }
+
+                //puis on MAJ sa nouvelle note
+                    $maj_note = $pdo->prepare(
+                        "UPDATE utilisateur
+                        SET note = ?
+                        WHERE id_utilisateur = ?
+                    ");
+                    $maj_note->execute([$avis_conducteur['id_conducteur'],$new_note]);
+            }   
+            //puis on change le statut de lavis
+            $prep = $pdo->prepare(
+                "UPDATE avis 
+                SET statut_avis = ? 
+                WHERE id_avis = ?
+            ");
+            $prep->execute([$validation,$id_avis]);
+
+            return ['success'=>true,'message'=>'avis valdier ou refuser correctement'];
+            
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return ['success' => false, 'message' => 'Echec de validation des avis'];
+            }
+        }
 }
 
 ?>

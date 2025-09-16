@@ -5,7 +5,7 @@ require_once 'classes/MonCompte.php';
 
 $avis_attente = MonCompte::chargerAvis($pdo,$id_utilisateur);
 if(!$avis_attente['success']){
-    $_SESSION['erreur'] = $avis['message'];
+    $_SESSION['erreur'] = $avis_attente['message'];
     header("Location: mon_compte.php");
     exit;
 }
@@ -28,7 +28,7 @@ if(!$avis_attente['success']){
 
     <?php include 'includes/header.php' ?>
 
-        <?php foreach($avis_attente as $avis): ?>
+        <?php foreach($avis_attente['avis'] as $avis): ?>
             <div class="avis_attente">
                 <div class="entete">
                     <strong><?= htmlspecialchars($avis['pseudo']) ?></strong>

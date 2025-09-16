@@ -453,6 +453,82 @@ class Covoiturage {
     }
 
     /**
+     * 
+     */
+    public static function rechercheFiltrerCovoiturage(PDO $pdo, string $lieu_depart, string $lieu_arrive, string $date_depart, int $nb_places_voulu_par_le_passager, ?string $type_energie = null, ?float $prix = null, ?string $duree = null, ?float $avis = null): array {
+        try {
+            $sql = "SELECT 
+                u.id_utilisateur as u_id,
+                u.pseudo as u_pseudo,
+                u.photo as u_photo,
+                u.note as u_note,
+                v.id_voiture as v_id,
+                v.energie as v_energie,
+                c.id_covoiturage as c_id,
+                c.date_depart as c_date_depart,
+                c.heure_depart as c_heure_depart,
+                c.duree_voyage as c_duree_voyage,
+                c.lieu_depart as c_lieu_depart,
+                c.lieu_arrive as c_lieu_arrive,
+                c.nb_place_dispo as c_nb_place_dispo,
+                c.prix_personne as c_prix_personne
+            FROM covoiturage c
+            INNER JOIN utilisateur u ON c.id_conducteur = u.id_utilisateur
+            INNER JOIN voiture v ON c.id_voiture = v.id_voiture
+            WHERE c.lieu_depart = ?
+            AND c.lieu_arrive = ?
+            AND c.date_depart >= ?
+            AND c.nb_place_dispo >= ?";
+
+            $params = [$lieu_depart, $lieu_arrive, $date_depart, $nb_places_voulu_par_le_passager];
+
+            // Filtre énergie
+            if (!empty($type_energie)) {
+                $sql .= " AND v.energie = ?";
+                $params[] = $type_energie;
+            }
+
+            // Filtre prix
+            if (!empty($prix)) {
+                $sql .= " AND c.prix_personne <= ?";
+                $params[] = $prix;
+            }
+
+            // Filtre durée
+            if (!empty($duree)) {
+                $sql .= " AND c.duree_voyage <= ?";
+                $params[] = $duree;
+            }
+
+            // Filtre avis
+            if (!empty($avis)) {
+                $sql .= " AND u.note >= ?";
+                $params[] = $avis;
+            }
+
+            $sql .= " ORDER BY c.date_depart";
+
+            $prep_covoit = $pdo->prepare($sql);
+            $prep_covoit->execute($params);
+            $recherche_covoit = $prep_covoit->fetchAll();
+
+            return [
+                'success' => true,
+                'info_covoiturage' => $recherche_covoit,
+                'message' => 'Recherche correctement effectuée avec filtre'
+            ];
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return [
+                'success'=> false,
+                'info_covoiturage'=> null, 
+                'message'=>'Erreur lors de la recherche avec filtre'
+            ];
+        }
+    }
+ 
+
+    /**
      * supprime un covoit creer par un conducteur
      * @param PDO $pdo : PDO pour connexion a la bdd.
      * @param int $id_conducteur : Id du conducteur

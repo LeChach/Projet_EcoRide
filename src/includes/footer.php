@@ -4,8 +4,8 @@
     </div>
 
     <div class="liens_footer">
-        <a href="mentions-legales.php">Mentions légales</a>
-        <a href="confidentialite.php">Politique de confidentialité</a>
+        <p>Mentions légales</p>
+        <p>Politique de confidentialité</p>
     </div>
 
 </footer>
