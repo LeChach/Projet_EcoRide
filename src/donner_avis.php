@@ -18,77 +18,73 @@ if($id_covoiturage === null){
     <title>Donnez votre avis - Eco Ride</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
-    <style>
-        .rating-section {
-            margin: 15px 0;
-        }
-
-        .rating-stars {
-            display: flex;
-            gap: 5px;
-            margin: 10px 0;
-        }
-
-        .star {
-            width: 30px;
-            height: 30px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .star:hover {
-            transform: scale(1.1);
-        }
-
-        #note-text {
-            margin-left: 10px;
-            font-weight: bold;
-            color: #666;
-        }
-    </style>
-
 </head>
 
 <body>
-
     <?php include 'includes/header.php' ?>
-    <form method="POST" action="mon_compte.php">
 
-        <div class="rating-section">
-            <label>Votre note :</label>
-            <div class="rating-stars" id="rating">
-                <img src="assets/icons/Star_black.png" class="star" data-rating="1" alt="1 étoile">
-                <img src="assets/icons/Star_black.png" class="star" data-rating="2" alt="2 étoiles">
-                <img src="assets/icons/Star_black.png" class="star" data-rating="3" alt="3 étoiles">
-                <img src="assets/icons/Star_black.png" class="star" data-rating="4" alt="4 étoiles">
-                <img src="assets/icons/Star_black.png" class="star" data-rating="5" alt="5 étoiles">
+    <main>
+        <div class="review-container">
+            <h1>Donnez votre avis</h1>
+
+            <!-- Information sur l'importance de l'avis -->
+            <div class="helper-info">
+                <h3>Votre avis compte !</h3>
+                <p>Aidez la communauté EcoRide en partageant votre expérience. 
+                   Votre évaluation permettra d'améliorer la qualité des trajets pour tous.</p>
             </div>
-            <input type="hidden" name="note" id="note-input" value="1">
-            <span id="note-text">Très mauvais</span>
-        </div>
-        
-        <textarea name="commentaire" placeholder="Votre commentaire..."></textarea>
 
-        <input type="hidden" name="type_POST" value="ajouter_avis">
-        <input type="hidden" name="id_covoiturage" value="<?=$id_covoiturage?>">
-        <button type="submit">Envoyer l'évaluation</button>
-    </form>
+            <form method="POST" action="mon_compte.php" class="review-form">
+                
+                <!-- Section notation -->
+                <div class="rating-section">
+                    <label for="rating">Votre évaluation</label>
+                    <div class="rating-stars" id="rating">
+                        <img src="assets/icons/Star_black.png" class="star" data-rating="1" alt="1 étoile">
+                        <img src="assets/icons/Star_black.png" class="star" data-rating="2" alt="2 étoiles">
+                        <img src="assets/icons/Star_black.png" class="star" data-rating="3" alt="3 étoiles">
+                        <img src="assets/icons/Star_black.png" class="star" data-rating="4" alt="4 étoiles">
+                        <img src="assets/icons/Star_black.png" class="star" data-rating="5" alt="5 étoiles">
+                    </div>
+                    <input type="hidden" name="note" id="note-input" value="1">
+                    <div class="note-text very-bad" id="note-text">Très mauvais</div>
+                </div>
+
+                <!-- Section commentaire -->
+                <div class="comment-section">
+                    <label for="commentaire">Votre commentaire (optionnel)</label>
+                    <textarea name="commentaire" id="commentaire" class="comment-textarea" 
+                              placeholder="Partagez votre expérience : ponctualité, convivialité, conduite, etc."></textarea>
+                </div>
+
+                <!-- Champs cachés -->
+                <input type="hidden" name="type_POST" value="ajouter_avis">
+                <input type="hidden" name="id_covoiturage" value="<?= htmlspecialchars($id_covoiturage) ?>">
+
+                <!-- Bouton d'envoi -->
+                <div class="submit-section">
+                    <button type="submit" class="submit-button">Envoyer mon évaluation</button>
+                </div>
+
+            </form>
+        </div>
+    </main>
 
     <?php include 'includes/footer.php' ?>
 
     <script>
-            document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function() {
             const stars = document.querySelectorAll('.star');
             const noteInput = document.getElementById('note-input');
             const noteText = document.getElementById('note-text');
             
-            // Textes pour chaque note (plus de "0")
-            const noteTextes = {
-                1: 'Très mauvais',
-                2: 'Mauvais', 
-                3: 'Correct',
-                4: 'Bon',
-                5: 'Excellent'
+            // Textes et classes pour chaque note
+            const noteConfig = {
+                1: { text: 'Très mauvais', class: 'very-bad' },
+                2: { text: 'Mauvais', class: 'bad' }, 
+                3: { text: 'Correct', class: 'correct' },
+                4: { text: 'Bon', class: 'good' },
+                5: { text: 'Excellent', class: 'excellent' }
             };
             
             // Initialiser avec 1 étoile par défaut
@@ -99,6 +95,12 @@ if($id_covoiturage === null){
                 star.addEventListener('click', function() {
                     const rating = parseInt(this.dataset.rating);
                     setRating(rating);
+                    
+                    // Animation sur l'étoile cliquée
+                    this.classList.add('selected');
+                    setTimeout(() => {
+                        this.classList.remove('selected');
+                    }, 1000);
                 });
                 
                 // Effet hover
@@ -116,7 +118,12 @@ if($id_covoiturage === null){
             
             function setRating(rating) {
                 noteInput.value = rating;
-                noteText.textContent = noteTextes[rating];
+                
+                // Mettre à jour le texte et la classe
+                const config = noteConfig[rating];
+                noteText.textContent = config.text;
+                noteText.className = 'note-text ' + config.class;
+                
                 updateStars(rating);
             }
             
@@ -133,8 +140,7 @@ if($id_covoiturage === null){
                     }
                 });
             }
-            });
+        });
     </script>
-
 </body>
 </html>

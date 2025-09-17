@@ -434,9 +434,10 @@ class Covoiturage {
                 AND c.lieu_arrive = ?
                 AND c.date_depart >= ?
                 AND c.nb_place_dispo >= ?
+                AND c.statut_covoit = ?
                 ORDER BY c.date_depart"
             );
-            $prep_covoit->execute([$lieu_depart,$lieu_arrive,$date_depart,$nb_places_voulu_par_le_passager]);
+            $prep_covoit->execute([$lieu_depart,$lieu_arrive,$date_depart,$nb_places_voulu_par_le_passager,'planifier']);
             $recherche_covoit = $prep_covoit->fetchAll();
 
             return [
@@ -478,9 +479,11 @@ class Covoiturage {
             WHERE c.lieu_depart = ?
             AND c.lieu_arrive = ?
             AND c.date_depart >= ?
-            AND c.nb_place_dispo >= ?";
+            AND c.nb_place_dispo >= ?
+            AND c.statut_covoit = ?
+            ";
 
-            $params = [$lieu_depart, $lieu_arrive, $date_depart, $nb_places_voulu_par_le_passager];
+            $params = [$lieu_depart, $lieu_arrive, $date_depart, $nb_places_voulu_par_le_passager,'planifier'];
 
             // Filtre énergie
             if (!empty($type_energie)) {
@@ -859,7 +862,7 @@ class Covoiturage {
 
             // Vérification si un avis existe déjà
                 $prep_verif = $pdo->prepare(
-                    "SELECT COUNT * as nb_avis
+                    "SELECT COUNT(*) as nb_avis
                     FROM avis
                     WHERE id_passager = ? 
                     AND id_covoiturage = ?
@@ -883,12 +886,106 @@ class Covoiturage {
 
         } catch (PDOException $e){
             error_log($e->getMessage());
-            $pdo->rollBack();
             return ['success'=> false, 'message' => 'Erreur lors de l\'arriver du covoit'];
         }
         
 
 
     }
+
+    /**
+     * 
+     */
+    public static function confirmerCovoiturage($pdo, $id_utilisateur, $id_covoiturage) {
+        try {
+            // Commencer une transaction pour assurer la cohérence
+            $pdo->beginTransaction();
+            
+            // Vérifier que l'utilisateur (passager) a participé à ce covoiturage
+            $verif_stmt = $pdo->prepare("
+                SELECT r.id_reservation, r.nb_place_reserve, c.id_conducteur, c.statut_covoit
+                FROM reservation r
+                JOIN covoiturage c ON r.id_covoiturage = c.id_covoiturage
+                WHERE r.id_covoiturage = ? AND r.id_passager = ? AND r.statut_reservation = 'active'
+            ");
+            $verif_stmt->execute([$id_covoiturage, $id_utilisateur]);
+            $reservation = $verif_stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$reservation) {
+                $pdo->rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Vous n\'avez pas participé à ce covoiturage ou il a déjà été confirmé'
+                ];
+            }
+            
+            // Vérifier que le covoiturage est bien terminé par le conducteur
+            if ($reservation['statut_covoit'] !== 'terminer') {
+                $pdo->rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Ce covoiturage n\'a pas encore été terminé par le conducteur'
+                ];
+            }
+            
+            // Récupérer le virement en attente pour ce passager et ce covoiturage
+            $virement_stmt = $pdo->prepare("
+                SELECT id_virement, montant_virement
+                FROM virement 
+                WHERE id_covoiturage = ? AND id_passager = ? AND id_conducteur = ? AND statut = 'en_attente'
+            ");
+            $virement_stmt->execute([$id_covoiturage, $id_utilisateur, $reservation['id_conducteur']]);
+            $virement = $virement_stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$virement) {
+                $pdo->rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'Aucun virement en attente trouvé pour ce covoiturage'
+                ];
+            }
+            
+            // 1. Mettre à jour le statut du virement
+            $update_virement_stmt = $pdo->prepare("
+                UPDATE virement 
+                SET statut = 'valider' 
+                WHERE id_virement = ?
+            ");
+            $update_virement_stmt->execute([$virement['id_virement']]);
+            
+            // 2. Créditer le conducteur
+            $update_credit_stmt = $pdo->prepare("
+                UPDATE utilisateur 
+                SET credit = credit + ? 
+                WHERE id_utilisateur = ?
+            ");
+            $update_credit_stmt->execute([$virement['montant_virement'], $reservation['id_conducteur']]);
+            
+            // 3. Mettre à jour le statut de la réservation du passager
+            $update_reservation_stmt = $pdo->prepare("
+                UPDATE reservation 
+                SET statut_reservation = 'terminer' 
+                WHERE id_reservation = ?
+            ");
+            $update_reservation_stmt->execute([$reservation['id_reservation']]);
+            
+            // Valider la transaction
+            $pdo->commit();
+            
+            return [
+                'success' => true,
+                'message' => 'Covoiturage confirmé avec succès ! Le conducteur a reçu ses crédits.'
+            ];
+            
+        } catch (PDOException $e) {
+            // Annuler la transaction en cas d'erreur
+            $pdo->rollBack();
+            error_log("Erreur lors de la confirmation du covoiturage: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Erreur technique lors de la confirmation'
+            ];
+        }
+    }
+
 }
-?>

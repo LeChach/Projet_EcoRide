@@ -20,36 +20,41 @@ if(!$avis_attente['success']){
     <title>Donnez votre avis - Eco Ride</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
-
 </head>
 
-
 <body>
-
     <?php include 'includes/header.php' ?>
 
-        <?php foreach($avis_attente['avis'] as $avis): ?>
-            <div class="avis_attente">
-                <div class="entete">
-                    <strong><?= htmlspecialchars($avis['pseudo']) ?></strong>
-                    <span>(Covoiturage : le <?= htmlspecialchars($avis['date_depart']) ?>)</span>
+    <main>
+        <div class="validation-container">
+            <h1>Validation des avis</h1>
+            
+            <?php foreach($avis_attente['avis'] as $avis): ?>
+                <div class="avis_attente">
+                    <div class="entete">
+                        <p>Passager: <?= htmlspecialchars($avis['passager']) ?></p>
+                        <p>Conducteur: <?= htmlspecialchars($avis['conducteur']) ?></p>
+                        <span>(Covoiturage : le <?= htmlspecialchars(date('d/m/Y', strtotime($avis['date_depart'] ?? ''))) ?>)</span>
+                    </div>
+                    <div class="contenu">
+                        <p>Note : <?= htmlspecialchars($avis['note']) ?>/5</p>
+                        <p>Commentaire : <?= htmlspecialchars($avis['commentaire']) ?></p>
+                    </div>
+                    <form method="POST" action="mon_compte.php">
+                        <input type="hidden" name="id_avis" value="<?= $avis['id_avis'] ?>">
+                        <input type="hidden" name="type_POST" value="valider_avis">
+                        <button type="submit" name="validation" value="valider">Valider</button>
+                        <button type="submit" name="validation" value="refuser">Refuser</button>
+                    </form>
                 </div>
-                <div class="contenu">
-                    <p>Note : <?= htmlspecialchars($avis['note']) ?>/5</p>
-                    <p>Commentaire : <?= htmlspecialchars($avis['commentaire']) ?></p>
-                </div>
-                <form method="POST" action="mon_compte.php">
-                    <input type="hidden" name="id_avis" value="<?= $avis['id_avis'] ?>">
-                    <input type="hidden" name="type_POST" value="valider_avis">
-                    <button type="submit" name="validation" value="valider">Valider</button>
-                    <button type="submit" name="validation" value="refuser">Refuser</button>
-                </form>
-            </div>
-        <?php endforeach; ?>
+            <?php endforeach; ?>
 
+            <div class="close-section">
+                <a href="mon_compte.php" class="close-button">Fermer</a>
+            </div>
+        </div>
+    </main>
 
     <?php include 'includes/footer.php' ?>
-
-
 </body>
 </html>

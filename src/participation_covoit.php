@@ -38,26 +38,79 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Confirmation de participation - Eco Ride</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
 
+<body>
     <?php include 'includes/header.php' ?>
 
-    <h2>Confirmation de participation</h2>
-    <p>Nombre de places demandées : <?= $nb_place_voulu ?></p>
-    <p>Prix total : <?= $prix_total ?> crédits</p>
-    <p>Crédit restant après réservation : <?= $new_solde ?></p>
+    <main>
+        <div class="participation-container">
+            <h2>Confirmation de participation</h2>
 
-        <form method="POST">
-            <input type="hidden" name="type_POST" value="confirmation_participation">
-            <input type="hidden" name="id_covoiturage" value="<?= $id_covoiturage ?>">
-            <input type="hidden" name="nb_place" value="<?= $nb_place_voulu ?>">
-            <button type="submit" name="confirmer">Confirmer ma participation</button>
-        </form>
+            <!-- Card avec détails de la réservation -->
+            <div class="confirmation-card">
+                <div class="booking-details">
+                    
+                    <div class="detail-row">
+                        <span class="detail-label">
+                            <span class="places-icon"></span>
+                            Nombre de places demandées
+                        </span>
+                        <span class="detail-value"><?= htmlspecialchars($nb_place_voulu) ?> place<?= $nb_place_voulu > 1 ? 's' : '' ?></span>
+                    </div>
 
-    <a href="recherche.php">Fermer</a>
+                    <div class="detail-row price-highlight">
+                        <span class="detail-label">
+                            <span class="price-icon"></span>
+                            Prix total
+                        </span>
+                        <span class="detail-value"><?= htmlspecialchars($prix_total) ?> €</span>
+                    </div>
+
+                    <div class="detail-row balance-info">
+                        <span class="detail-label">
+                            <span class="wallet-icon"></span>
+                            Crédit restant après réservation
+                        </span>
+                        <span class="detail-value"><?= htmlspecialchars($new_solde) ?> €</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Section de confirmation -->
+            <div class="confirmation-section">
+                <div class="confirmation-warning">
+                    Cette action débitera vos crédits. Voulez-vous vraiment confirmer votre participation ?
+                </div>
+
+                <div class="action-buttons">
+                    <form method="POST" style="display: inline;">
+                        <input type="hidden" name="type_POST" value="confirmation_participation">
+                        <input type="hidden" name="id_covoiturage" value="<?= htmlspecialchars($id_covoiturage) ?>">
+                        <input type="hidden" name="nb_place" value="<?= htmlspecialchars($nb_place_voulu) ?>">
+                        <button type="submit" name="confirmer" class="confirm-button">
+                            Confirmer ma participation
+                        </button>
+                    </form>
+
+                    <a href="recherche.php" class="cancel-button">Annuler</a>
+                </div>
+            </div>
+
+            <!-- Informations complémentaires -->
+            <div class="info-section">
+                <h4>Informations importantes</h4>
+                <p>
+                    Une fois votre participation confirmée, vos crédits seront immédiatement débités. 
+                    Vous recevrez une confirmation par email avec les détails du covoiturage.
+                </p>
+            </div>
+
+        </div>
+    </main>
 
     <?php include 'includes/footer.php' ?>
-
 </body>
 </html>

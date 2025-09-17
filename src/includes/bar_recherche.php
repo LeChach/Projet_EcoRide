@@ -28,6 +28,6 @@
                 value="<?= htmlspecialchars($_GET['nb_place'] ?? 1) ?>">
         </div>
 
-        <button type="submit" class="bouton_recherche">Rechercher</button>
+        <button type="submit" class="btn btn-primary">Rechercher</button>
     </form>
 </div>

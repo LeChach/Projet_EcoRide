@@ -98,7 +98,7 @@ class MonCompte {
                     WHERE p.id_utilisateur = ?
                 ");
                 $prep_role->execute([$id_utilisateur]);
-                $role = $prep_role->fetch();
+                $role = $prep_role->fetchAll(PDO::FETCH_ASSOC);
             //RECUPERATION DU NOMBRE DAVIS EN ATTENTE POUR EMPLOYE
                 $prep_avis_attente = $pdo->prepare(
                     "SELECT COUNT(*) as nb_attente 
@@ -331,14 +331,16 @@ class MonCompte {
         try{
             //PERMET DE RECUPERER LES AVIS DU CONDUCTEUR
             $prep_avis_c = $pdo->prepare(
-                "SELECT a.note, a.commentaire, u.pseudo, u.photo
+                "SELECT a.id_avis, a.commentaire, a.note, u.id_utilisateur, u.pseudo as passager, u.photo, c.date_depart
                 FROM avis a
                 INNER JOIN utilisateur u ON a.id_passager = u.id_utilisateur
-                WHERE a.id_covoiturage = ?
+                INNER JOIN covoiturage c ON a.id_covoiturage = c.id_covoiturage
+                WHERE a.statut_avis = ?
+                AND a.id_covoiturage = ?
                 AND a.id_conducteur = ?
-                AND a.statut_avis = 'valider'
-            "); 
-            $prep_avis_c->execute([$id_covoiturage,$id_utilisateur]);
+                ORDER BY a.date_avis DESC
+                "); 
+            $prep_avis_c->execute(['valider',$id_covoiturage,$id_utilisateur]);
             $avis = $prep_avis_c->fetchAll();
 
             return ['success' => true, 'message' => 'avis chargés', 'avis' => $avis];
@@ -353,41 +355,46 @@ class MonCompte {
      * 
      */
     public static function chargerAvis(PDO $pdo, int $id_utilisateur): array {
-        try{
-            //verification que cest bien un employe
-                $prep_role = $pdo->prepare(
-                    "SELECT libelle
-                    FROM role r INNER JOIN possede p ON r.id_role = p.id_role
-                    WHERE p.id_utilisateur = ?
-                ");
-                $prep_role->execute([$id_utilisateur]);
-                $role = $prep_role->fetch();
-                if($role['libelle'] !== 'Employe'){
-                    return ['success' => false, 'message' => 'Seulement les employés peuvent valider les avis'];
-                }
+        try {
+            // Vérification que l'utilisateur est bien un employé
+            $prep_role = $pdo->prepare(
+                "SELECT r.libelle
+                FROM role r
+                INNER JOIN possede p ON r.id_role = p.id_role
+                WHERE p.id_utilisateur = ?"
+            );
+            $prep_role->execute([$id_utilisateur]);
+            $roles = array_column($prep_role->fetchAll(PDO::FETCH_ASSOC), 'libelle');
 
-                $prep_avis = $pdo->prepare(
-                    "SELECT a.id_avis, a.commentaire, a.note, u.pseudo, c.date_depart
-                    FROM avis a
-                    INNER JOIN utilisateur u ON a.id_passager = u.id_utilisateur
-                    INNER JOIN covoiturage c ON a.id_covoiturage = c.id_covoiturage
-                    WHERE a.statut_avis = ?"
-                );
-                $prep_avis->execute(['en_attente']);
-                $avis_attente = $prep_avis->fetchAll();
+            if (!in_array('Employe', $roles)) {
+                return ['success' => false, 'message' => 'Vous n\'êtes pas employé'];
+            }
 
-                return ['success' => true, 'message' => 'Avis chargé', 'avis' => $avis_attente];
+            // Récupération des avis en attente
+            $prep_avis = $pdo->prepare(
+                "SELECT a.id_avis, a.commentaire, a.note, u.id_utilisateur, u.pseudo as passager, uc.id_utilisateur, uc.pseudo as conducteur, c.date_depart
+                FROM avis a
+                INNER JOIN utilisateur u ON a.id_passager = u.id_utilisateur
+                INNER JOIN covoiturage c ON a.id_covoiturage = c.id_covoiturage
+                LEFT JOIN utilisateur uc ON c.id_conducteur = uc.id_utilisateur
+                WHERE a.statut_avis = ?
+                ORDER BY a.date_avis DESC"
+            );
+            $prep_avis->execute(['en_attente']);
+            $avis_attente = $prep_avis->fetchAll(PDO::FETCH_ASSOC);
+
+            return ['success' => true, 'message' => 'Avis chargés', 'avis' => $avis_attente];
 
         } catch (PDOException $e) {
-        error_log($e->getMessage());
-        return ['success' => false, 'message' => 'Echec des données des avis'];
+            error_log($e->getMessage());
+            return ['success' => false, 'message' => 'Échec de récupération des avis'];
         }
     }
 
     /**
      * 
      */
-    public static function changerAvis(PDO $pdo,int $id_avis,array $data){
+    public static function changerAvis(PDO $pdo,int $id_avis,array $data): array {
         try{
             //CONTIENT LE NOUVEAU STATUT DE VALIDATION
                 $validation = $data['validation'];
@@ -443,7 +450,209 @@ class MonCompte {
             error_log($e->getMessage());
             return ['success' => false, 'message' => 'Echec de validation des avis'];
             }
+    }
+
+    /**
+     * 
+     */
+    public static function chargerUtilisateurAdmin(PDO $pdo,int $id_utilisateur): array {
+        try{
+            //verification si c'est bien l'admin
+                $verif_admin = $pdo->prepare(
+                    "SELECT r.libelle
+                    FROM role r
+                    INNER JOIN possede p ON r.id_role = p.id_role
+                    WHERE p.id_utilisateur = ?
+                ");
+                $verif_admin->execute([$id_utilisateur]);
+                $libelle = $verif_admin->fetchAll(PDO::FETCH_ASSOC);
+
+                // On extrait tous les libellés dans un tableau simple
+                $roles = array_column($libelle, 'libelle');
+
+                if (!in_array('Administrateur', $roles)) {
+                    return ['success' => false , 'message' => 'Vous n\'êtes pas administrateur'];
+                }
+            
+            //PREPARATION DE RECUP DES DONNEES
+                //recuperation du nbr de covoit par jour
+                    $prep_covoit = $pdo->prepare(
+                        "SELECT DATE(date_depart) AS jour, COUNT(*) AS nb_covoit
+                        FROM covoiturage
+                        GROUP BY DATE(date_depart)
+                        ORDER BY DATE(date_depart) ASC
+                    ");
+                    $prep_covoit->execute();
+                    $nb_covoit_j = $prep_covoit->fetchAll(PDO::FETCH_ASSOC);
+                //recuperation du nbr de credit par jour
+                    $prep_credits = $pdo->prepare(
+                        "SELECT DATE(date_commission) AS jour, SUM(montant) AS total_credits
+                        FROM commission
+                        GROUP BY DATE(date_commission)
+                        ORDER BY DATE(date_commission) ASC
+                    ");
+                    $prep_credits->execute();
+                    $nb_credit_j = $prep_credits->fetchAll(PDO::FETCH_ASSOC);
+                //recuperation du nbr total de credit
+                    $prep_credit_total = $pdo->prepare(
+                        "SELECT SUM(montant) AS total_credits
+                    FROM commission
+                    ");
+                    $prep_credit_total->execute();
+                    $totalCredits = (float)$prep_credit_total->fetch(PDO::FETCH_ASSOC)['total_credits'];
+                //recuperation de la liste des utilisateur
+                    $req_users = $pdo->prepare(
+                        "SELECT u.*, r.libelle AS role
+                        FROM utilisateur u
+                        INNER JOIN possede p ON u.id_utilisateur = p.id_utilisateur
+                        INNER JOIN role r ON p.id_role = r.id_role
+                        WHERE u.statut = 'actif'
+                        AND u.id_utilisateur != :id_admin
+                        AND r.id_role = (
+                            SELECT p2.id_role
+                            FROM possede p2
+                            JOIN role r2 ON p2.id_role = r2.id_role
+                            WHERE p2.id_utilisateur = u.id_utilisateur
+                                AND r2.libelle IN ('Employe','Utilisateur')
+                            ORDER BY CASE 
+                                WHEN r2.libelle = 'Employe' THEN 1
+                                WHEN r2.libelle = 'Utilisateur' THEN 2
+                            END
+                            LIMIT 1
+                        )
+                        ORDER BY CASE 
+                            WHEN r.libelle = 'Employe' THEN 1
+                            WHEN r.libelle = 'Utilisateur' THEN 2
+                        END
+                    ");
+                    $req_users->execute([":id_admin" => $id_utilisateur]);
+                    $utilisateurs = $req_users->fetchAll(PDO::FETCH_ASSOC);
+
+            return ['success'=> true, 'message' => 'Données correctement récupérées', 
+            'info_nb_covoit_j' => $nb_covoit_j ,
+            'info_credit_j'=> $nb_credit_j,
+            'info_credit_total'=> $totalCredits,
+            'info_utilisateur'=> $utilisateurs
+            ];
+            
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return ['success' => false, 'message' => 'Echec de recuperation des données utilisateur'];
         }
+    }
+
+    /**
+     * 
+     */
+    public static function suspendreUtilisateur(PDO $pdo,int $id_admin, int $id_utilisateur): array {
+        try{
+            //verification si c'est bien l'admin
+                $verif_admin = $pdo->prepare(
+                    "SELECT r.libelle
+                    FROM role r
+                    INNER JOIN possede p ON r.id_role = p.id_role
+                    WHERE p.id_utilisateur = ?
+                ");
+                $verif_admin->execute([$id_admin]);
+                $libelle = $verif_admin->fetchAll(PDO::FETCH_ASSOC);
+
+                // On extrait tous les libellés dans un tableau simple
+                $roles = array_column($libelle, 'libelle');
+
+                if (!in_array('Administrateur', $roles)) {
+                    return ['success' => false , 'message' => 'Vous n\'êtes pas administrateur'];
+                }
+            //verification si utilisateur est present        
+                $verif_ban = $pdo->prepare(
+                    "SELECT id_utilisateur
+                    FROM utilisateur
+                    WHERE id_utilisateur = ?
+                ");
+                $verif_ban->execute([$id_utilisateur]);
+                $id_ban = $verif_ban->fetch(PDO::FETCH_ASSOC);
+
+                if (empty($id_ban)){
+                    return ['success' => false , 'message' => 'Utilisateur non trouvé dans la base de donnée'];
+                }
+            //SUSPENDRE COMPTE UTILISATEUR
+                $prep_ban = $pdo->prepare(
+                    "UPDATE utilisateur
+                    SET statut = ?
+                    WHERE id_utilisateur = ?
+                ");
+                $prep_ban->execute(['suspendu',$id_utilisateur]);  
+
+            return ['success'=>true,'message'=>'avis valdier ou refuser correctement'];
+            
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return ['success' => false, 'message' => 'Echec de suspension de l\'utilisateur'];
+        }
+    }
+
+    /**
+     * 
+     */
+    public static function nouvelEmploye(PDO $pdo,int $id_admin, int $id_utilisateur): array {  
+        try{
+            //verification si c'est bien l'admin
+                $verif_admin = $pdo->prepare(
+                    "SELECT r.libelle
+                    FROM role r
+                    INNER JOIN possede p ON r.id_role = p.id_role
+                    WHERE p.id_utilisateur = ?
+                ");
+                $verif_admin->execute([$id_admin]);
+                $libelle = $verif_admin->fetchAll(PDO::FETCH_ASSOC);
+
+                // On extrait tous les libellés dans un tableau simple
+                $roles = array_column($libelle, 'libelle');
+
+                if (!in_array('Administrateur', $roles)) {
+                    return ['success' => false , 'message' => 'Vous n\'êtes pas administrateur'];
+                }
+            //verification si utilisateur est present        
+                $verif_ban = $pdo->prepare(
+                    "SELECT id_utilisateur
+                    FROM utilisateur
+                    WHERE id_utilisateur = ?
+                ");
+                $verif_ban->execute([$id_utilisateur]);
+                $id_ban = $verif_ban->fetch(PDO::FETCH_ASSOC);
+
+                if (empty($id_ban)){
+                    return ['success' => false , 'message' => 'Utilisateur non trouvé dans la base de donnée'];
+                }
+
+            //verification que utilisateur est deja employe
+                $verif_employe = $pdo->prepare(
+                    "SELECT r.libelle
+                    FROM role r
+                    INNER JOIN possede p ON p.id_role = r.id_role
+                    WHERE id_utilisateur = ?
+                ");
+                $verif_employe->execute([$id_utilisateur]);
+                $libelle = $verif_employe->fetchAll(PDO::FETCH_ASSOC);
+
+                $roles = array_column($libelle, 'libelle');
+
+                if (in_array('Employe',$roles)){
+                    return ['success' => false , 'message' => 'Cet Utilisateur est deja employé'];
+                }    
+            //AJOUT DE LA FONCTION EMPLOYE AU COMPTE UTILISATEUR
+                $prep_employe = $pdo->prepare(
+                    "INSERT INTO possede (id_utilisateur, id_role)
+                    VALUES (?,?);
+                ");
+                $prep_employe->execute([$id_utilisateur,2]);  
+
+            return ['success'=>true,'message'=>'Nouvel employé ajouté'];
+            
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            return ['success' => false, 'message' => 'Echec de suspension de l\'utilisateur'];
+        }
+    }
 }
 
 ?>

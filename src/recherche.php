@@ -16,43 +16,57 @@ $duree_max = null;
 $avis_min = 0;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $lieu_depart = $_POST['lieu_depart'] ?? $lieu_depart;
-    $lieu_arrive = $_POST['lieu_arrive'] ?? $lieu_arrive;
-    $date_depart = $_POST['date_depart'] ?? $date_depart;
-    $nb_places_voulu_par_le_passager = $_POST['nb_place'] ?? $nb_places_voulu_par_le_passager;
+    if($_POST['action'] === 'filtre'){
+        $lieu_depart = $_POST['lieu_depart'] ?? $lieu_depart;
+        $lieu_arrive = $_POST['lieu_arrive'] ?? $lieu_arrive;
+        $date_depart = $_POST['date_depart'] ?? $date_depart;
+        $nb_places_voulu_par_le_passager = $_POST['nb_place'] ?? $nb_places_voulu_par_le_passager;
 
-    $energies = !empty($_POST['energie']) ? $_POST['energie'] : null;
-    $prix_max = isset($_POST['prix_max']) ? floatval($_POST['prix_max']) : null;
-    $duree_max = isset($_POST['duree_max']) ? intval($_POST['duree_max']) : null;
-    $avis_min = isset($_POST['avis_min']) ? floatval($_POST['avis_min']) : 0;
+        $energies = !empty($_POST['energie']) ? $_POST['energie'] : null;
+        $prix_max = isset($_POST['prix_max']) ? floatval($_POST['prix_max']) : null;
+        $duree_max = isset($_POST['duree_max']) ? intval($_POST['duree_max']) : null;
+        $avis_min = isset($_POST['avis_min']) ? floatval($_POST['avis_min']) : 0;
 
-    // Conversion durée en format HH:MM:SS
-    $heures = floor($duree_max / 60);
-    $minutes = $duree_max % 60;
-    $duree_time = sprintf('%02d:%02d:00', $heures, $minutes);
+        // Conversion durée en format HH:MM:SS
+        $heures = floor($duree_max / 60);
+        $minutes = $duree_max % 60;
+        $duree_time = sprintf('%02d:%02d:00', $heures, $minutes);
 
-    $recherche_covoit = Covoiturage::rechercheFiltrerCovoiturage(
+        $recherche_covoit = Covoiturage::rechercheFiltrerCovoiturage(
+            $pdo,
+            $lieu_depart,
+            $lieu_arrive,
+            $date_depart,
+            $nb_places_voulu_par_le_passager,
+            $energies,
+            $prix_max,
+            $duree_time,
+            $avis_min
+        );
+    }else{
+        $lieu_depart = $_POST['lieu_depart'] ?? $lieu_depart;
+        $lieu_arrive = $_POST['lieu_arrive'] ?? $lieu_arrive;
+        $date_depart = $_POST['date_depart'] ?? $date_depart;
+        $nb_places_voulu_par_le_passager = $_POST['nb_place'] ?? $nb_places_voulu_par_le_passager;
+        
+        $recherche_covoit = Covoiturage::rechercheCovoiturage(
         $pdo,
         $lieu_depart,
         $lieu_arrive,
         $date_depart,
-        $nb_places_voulu_par_le_passager,
-        $energies,
-        $prix_max,
-        $duree_time,
-        $avis_min
-    );
-} elseif ($lieu_depart && $lieu_arrive && $date_depart) {
-    $recherche_covoit = Covoiturage::rechercheCovoiturage(
-        $pdo,
-        $lieu_depart,
-        $lieu_arrive,
-        $date_depart,
-        $nb_places_voulu_par_le_passager
-    );
-} else {
-    $recherche_covoit = null;
-}
+        $nb_places_voulu_par_le_passager);
+    }
+    } elseif ($lieu_depart && $lieu_arrive && $date_depart) {
+        $recherche_covoit = Covoiturage::rechercheCovoiturage(
+            $pdo,
+            $lieu_depart,
+            $lieu_arrive,
+            $date_depart,
+            $nb_places_voulu_par_le_passager
+        );
+    } else {
+        $recherche_covoit = null;
+    }
 ?>
 
 
@@ -77,16 +91,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <?php if ($participation_ok): ?>
-            <p style="color:green;"><?= htmlspecialchars($participation_ok) ?></p>
+            <div class="message message-success"><?= htmlspecialchars($participation_ok) ?></div>
         <?php elseif ($erreur_participation): ?>
-            <p style="color:red;"><?= htmlspecialchars($erreur_participation) ?></p>
+            <div class="message message-error"><?= htmlspecialchars($erreur_participation) ?></div>
         <?php endif;?>
 
         <?php if ($recherche_covoit && !empty($recherche_covoit['info_covoiturage'])) : ?>
 
             <div class="conteneur_recherche">
 
-                <button class="bouton_filtre_mobile" >Filtres</button>
+                <button class="btn btn-primary bouton_filtre_mobile">Filtres</button>
 
                 <aside class="colonne_filtre" id="filtersPanel">
                     <form action="recherche.php" method="POST" id="filtersForm">
@@ -154,8 +168,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <input type="hidden" name="date_depart" value="<?=$date_depart?>">
                         <input type="hidden" name="nb_place" value="<?=$nb_places_voulu_par_le_passager?>">
                         <!-- Bouton -->
-                        <button type="submit" class="btn-filtrer">Filtrer</button>
-                        <button type="reset" class="btn-reset">Réinitialiser</button>
+                        <button type="submit" name="action" value="filtre" class="btn btn-primary">Filtrer</button>
+                        <button type="submit" name="action" value="noFiltre" class="btn btn-secondary">Réinitialiser</button>
 
                     </form>
                 </aside>
@@ -193,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
                                     <div class="heure">
                                         <p><?= date('H:i',strtotime($covoit['c_heure_depart'])) ?></p>
-                                        <p>🚗</p>
+                                        <img src="assets/icons/icon_car_profil.png" alt="icone voiture">
                                         <p>
                                             <?php 
                                             $heure_depart = strtotime($covoit['c_heure_depart']);
@@ -214,11 +228,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         &lieu_arrive=<?=$lieu_arrive?>
                                         &date_depart=<?=$date_depart?>
                                         &nb_place=<?=$nb_places_voulu_par_le_passager?>
-                                    ">Détails</a>
+                                    "class="btn btn-secondary btn-small">Détails</a>
                                     <form action="participation_covoit.php" method="POST">
+                                        <input type="hidden" name="type_POST" value="affichage_double_participation">
                                         <input type="hidden" name="id_covoiturage" value="<?= $covoit['c_id'] ?>">
                                         <input type="hidden" name="nb_place" value="<?= $nb_places_voulu_par_le_passager ?>">
-                                        <button type="submit">Participer</button>
+                                        <button type="submit" class="btn btn-primary btn-small">Participer</button>
+
                                     </form>
                                 </div>
                             </div>
