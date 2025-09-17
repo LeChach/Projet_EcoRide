@@ -117,32 +117,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
 
-                    <!-- Section Voiture -->
-                    <div class="ride-form-section">
-                        <h3>Véhicule</h3>
-                        
-                        <div class="car-selection">
-                            <?php if (empty($voitures_utilisateur)): ?>
-                                <div class="no-car-message">
-                                    <p>Vous devez d'abord ajouter une voiture pour créer un covoiturage.</p>
-                                    <a href="ajouter_voiture.php" class="btn btn-primary">Ajouter une voiture</a>
-                                </div>
-                            <?php else: ?>
-                                <div class="ride-form-group">
-                                    <label for="id_voiture">Choisissez votre voiture</label>
-                                    <select name="id_voiture" id="id_voiture" class="car-select" required>
-                                        <option value="">-- Sélectionner une voiture --</option>
-                                        <?php foreach ($voitures_utilisateur as $voiture): ?>
-                                            <option value="<?= $voiture['id_voiture'] ?>">
-                                                <?= htmlspecialchars($voiture['marque']) ?> - <?= htmlspecialchars($voiture['modele']) ?> 
-                                                (<?= $voiture['nb_place'] ?> place<?= $voiture['nb_place'] > 1 ? 's' : '' ?> - <?= htmlspecialchars($voiture['energie']) ?>)
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            <?php endif; ?>
+                    <!-- Section Voiture et Places -->
+                        <div class="ride-form-section">
+                            <h3>Véhicule et places disponibles</h3>
+                            
+                            <div class="car-selection">
+                                <?php if (empty($voitures_utilisateur)): ?>
+                                    <div class="no-car-message">
+                                        <p>Vous devez d'abord ajouter une voiture pour créer un covoiturage.</p>
+                                        <a href="ajouter_voiture.php" class="btn btn-primary">Ajouter une voiture</a>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="ride-form-group">
+                                        <label for="id_voiture">Choisissez votre voiture</label>
+                                        <select name="id_voiture" id="id_voiture" class="car-select" required onchange="updateMaxPlaces()">
+                                            <option value="">-- Sélectionner une voiture --</option>
+                                            <?php foreach ($voitures_utilisateur as $voiture): ?>
+                                                <option value="<?= $voiture['id_voiture'] ?>" data-places="<?= $voiture['nb_place'] ?>">
+                                                    <?= htmlspecialchars($voiture['marque']) ?> - <?= htmlspecialchars($voiture['modele']) ?> 
+                                                    (<?= $voiture['nb_place'] ?> place<?= $voiture['nb_place'] > 1 ? 's' : '' ?> - <?= htmlspecialchars($voiture['energie']) ?>)
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="ride-form-group">
+                                        <label for="nb_place_dispo">Nombre de places à proposer</label>
+                                        <select name="nb_place_dispo" id="nb_place_dispo" class="car-select" required disabled>
+                                            <option value="">-- Choisissez d'abord une voiture --</option>
+                                        </select>
+                                        <small class="form-help-text">Choisissez combien de places vous souhaitez mettre à disposition des passagers</small>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                    </div>
 
                     <?php if (!empty($voitures_utilisateur)): ?>
                         <button type="submit" class="add-ride-submit">Créer le covoiturage</button>
@@ -156,3 +164,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php include 'includes/footer.php'; ?>
 </body>
 </html>
+
+<script>
+    function updateMaxPlaces() {
+    const voitureSelect = document.getElementById('id_voiture');
+    const placesSelect = document.getElementById('nb_place_dispo');
+    
+    if (voitureSelect.value === '') {
+        placesSelect.disabled = true;
+        placesSelect.innerHTML = '<option value="">-- Choisissez d\'abord une voiture --</option>';
+        return;
+    }
+    
+    const selectedOption = voitureSelect.options[voitureSelect.selectedIndex];
+    const maxPlaces = parseInt(selectedOption.getAttribute('data-places'));
+    
+    placesSelect.disabled = false;
+    placesSelect.innerHTML = '<option value="">-- Nombre de places --</option>';
+    
+    for (let i = 1; i <= maxPlaces; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i + ' place' + (i > 1 ? 's' : '');
+        placesSelect.appendChild(option);
+    }
+}
+</script>

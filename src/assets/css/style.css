@@ -4414,3 +4414,26 @@ footer .logo img {
         padding: 8px 14px;
     }
 }
+
+/* ===== CHAMP NOMBRE DE PLACES - AJOUTER COVOITURAGE ===== */
+.form-help-text {
+    display: block;
+    margin-top: var(--spacing-xs);
+    font-size: 0.85rem;
+    color: var(--text-light);
+    font-style: italic;
+    line-height: 1.4;
+}
+
+.car-select:disabled {
+    background-color: #f5f5f5;
+    color: var(--text-light);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.car-select:disabled:hover {
+    border-color: var(--border-light);
+    box-shadow: none;
+    transform: none;
+}

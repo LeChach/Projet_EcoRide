@@ -20,6 +20,7 @@ class Covoiturage {
             $duree_voyage = sprintf('%02d:%02d:00', (int)$data['duree_voyage_heure'] ?? 0, (int)$data['duree_voyage_min'] ?? 0);
             $prix_personne = $data['prix_personne'] ?? 0;
             $id_voiture = (int)$data['id_voiture'] ?? 0;
+            $nb_place_dispo = (int)$data['nb_place_dispo'] ?? 0; // NOUVEAU CHAMP
 
             $pdo->beginTransaction();
 
@@ -64,16 +65,22 @@ class Covoiturage {
                     return ['success' => false, 'message' => 'Solde insufisant pour créer un nouveau covoiturage'];
                 }    
 
-                //recuperation du nombre de place
-                $prep_voiture = $pdo->prepare("SELECT nb_place FROM voiture WHERE id_voiture = ?");
-                $prep_voiture->execute([$id_voiture]);
+                //recuperation du nombre de place maximum de la voiture
+                $prep_voiture = $pdo->prepare("SELECT nb_place FROM voiture WHERE id_voiture = ? AND id_conducteur = ?");
+                $prep_voiture->execute([$id_voiture, $id_utilisateur]);
                 $voiture_info = $prep_voiture->fetch(PDO::FETCH_ASSOC);
                 if (!$voiture_info) {
                     return ['success' => false, 'message' => 'Voiture introuvable'];
                 }
-                $nb_place_dispo = $voiture_info['nb_place'];
-
-
+                
+                // VALIDATION DU NOMBRE DE PLACES CHOISI
+                $nb_place_max = $voiture_info['nb_place'];
+                if ($nb_place_dispo < 1) {
+                    return ['success' => false, 'message' => 'Vous devez proposer au moins 1 place'];
+                }
+                if ($nb_place_dispo > $nb_place_max) {
+                    return ['success' => false, 'message' => 'Nombre de places supérieur à la capacité de votre voiture'];
+                }
 
             //UNE FOIS TOUT OK INSERTION DU NOUVEAU COVOIT
                 $prep_nouveau_covoit = $pdo->prepare(
@@ -95,7 +102,7 @@ class Covoiturage {
                 $duree_voyage,
                 $lieu_depart,
                 $lieu_arrive,
-                $nb_place_dispo,
+                $nb_place_dispo, // UTILISATION DE LA VALEUR CHOISIE
                 $prix_personne,
                 $id_utilisateur,
                 $id_voiture
