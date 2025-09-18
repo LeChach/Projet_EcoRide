@@ -1,17 +1,18 @@
 <?php
+
 require_once 'fonction_php/fonction.php';
 
 class Covoiturage {
 
     /**
+     * Permet de créer un covoiturage
      * @param PDO $pdo : PDO pour connexion a la bdd
      * @param int $id_utilisateur : Id du conducteur
      * @param array $data : donnée du formulaire
-     * @return array : ['success' => boolean , 'message' => string]
+     * @return array : ['success' => bool , 'message' => string]
      */
     public static function creationCovoiturage (PDO $pdo, int $id_utilisateur, array $data) : array{
         try{
-            
             //ON COMMENCE PAR VALIDER LES DONNEES
             $lieu_depart = formaterVille($data['lieu_depart']);
             $lieu_arrive = formaterVille($data['lieu_arrive']);
@@ -20,68 +21,64 @@ class Covoiturage {
             $duree_voyage = sprintf('%02d:%02d:00', (int)$data['duree_voyage_heure'] ?? 0, (int)$data['duree_voyage_min'] ?? 0);
             $prix_personne = $data['prix_personne'] ?? 0;
             $id_voiture = (int)$data['id_voiture'] ?? 0;
-            $nb_place_dispo = (int)$data['nb_place_dispo'] ?? 0; // NOUVEAU CHAMP
+            $nb_place_dispo = (int)$data['nb_place_dispo'] ?? 0;
 
             $pdo->beginTransaction();
 
             //PUIS ON VA GERER TOUT LES CAS QUI POSERONS PROBLEME
-
                 //cas ou les lieux n'ont pas étés inscris
-                if( !$lieu_arrive || !$lieu_depart ){
-                    return ['success' => false, 'message' => 'Lieu de de départ ou d arrivé incomplet']; 
-                } 
+                    if( !$lieu_arrive || !$lieu_depart ){
+                        return ['success' => false, 'message' => 'Lieu de de départ ou d arrivé incomplet']; 
+                    } 
                 //cas du prix du voyage non correct
-                if( $prix_personne <= 0 || !is_numeric($prix_personne) ){
-                    return ['success' => false, 'message' => 'Montant prix non valide'];
-                }
+                    if( $prix_personne <= 0 || !is_numeric($prix_personne) ){
+                        return ['success' => false, 'message' => 'Montant prix non valide'];
+                    }
                 //mesure de 1h minimum pour mettre un covoit en ligne
-                $TempsDepart = new DateTime("$date_depart $heure_depart");
-                $TempsMin = new DateTime('+1 hour');
-                if($TempsDepart < $TempsMin){
-                    return ['success' => false, 'message' => 'Covoiturage programmé trop tot'];
-                }
+                    $TempsDepart = new DateTime("$date_depart $heure_depart");
+                    $TempsMin = new DateTime('+1 hour');
+                    if($TempsDepart < $TempsMin){
+                        return ['success' => false, 'message' => 'Covoiturage programmé trop tot'];
+                    }
                 //verification si la voiture n'est pas deja prise
-                $prep_voiture_dispo = $pdo->prepare(
-                    "SELECT COUNT(*) as nbr
-                    FROM covoiturage
-                    WHERE id_voiture = ?
-                    AND date_depart = ?
-                    AND heure_depart = ?"
-                );
-                $prep_voiture_dispo->execute([$id_voiture,$date_depart,$heure_depart]);
-                $voiture_dispo = $prep_voiture_dispo->fetch(PDO::FETCH_ASSOC);
-                if($voiture_dispo['nbr']>0){
-                    return ['success' => false, 'message' => 'Voiture déjà prise'];
-                }
+                    $prep_voiture_dispo = $pdo->prepare(
+                        "SELECT COUNT(*) as nbr
+                        FROM covoiturage
+                        WHERE id_voiture = ?
+                        AND date_depart = ?
+                        AND heure_depart = ?"
+                    );
+                    $prep_voiture_dispo->execute([$id_voiture,$date_depart,$heure_depart]);
+                    $voiture_dispo = $prep_voiture_dispo->fetch(PDO::FETCH_ASSOC);
+                    if($voiture_dispo['nbr']>0){
+                        return ['success' => false, 'message' => 'Voiture déjà prise'];
+                    }
                 //verification du solde du credit du conducteur
-                $prep_credit_conducteur = $pdo->prepare(
-                    "SELECT credit
-                    FROM utilisateur
-                    WHERE id_utilisateur = ?
-                    ");
-                $prep_credit_conducteur->execute([$id_utilisateur]);
-                $credit_conducteur = $prep_credit_conducteur->fetch();
-                if(($credit_conducteur['credit'] - 2) < 0){
-                    return ['success' => false, 'message' => 'Solde insufisant pour créer un nouveau covoiturage'];
-                }    
-
+                    $prep_credit_conducteur = $pdo->prepare(
+                        "SELECT credit
+                        FROM utilisateur
+                        WHERE id_utilisateur = ?
+                        ");
+                    $prep_credit_conducteur->execute([$id_utilisateur]);
+                    $credit_conducteur = $prep_credit_conducteur->fetch();
+                    if(($credit_conducteur['credit'] - 2) < 0){
+                        return ['success' => false, 'message' => 'Solde insufisant pour créer un nouveau covoiturage'];
+                    }    
                 //recuperation du nombre de place maximum de la voiture
-                $prep_voiture = $pdo->prepare("SELECT nb_place FROM voiture WHERE id_voiture = ? AND id_conducteur = ?");
-                $prep_voiture->execute([$id_voiture, $id_utilisateur]);
-                $voiture_info = $prep_voiture->fetch(PDO::FETCH_ASSOC);
-                if (!$voiture_info) {
-                    return ['success' => false, 'message' => 'Voiture introuvable'];
-                }
-                
+                    $prep_voiture = $pdo->prepare("SELECT nb_place FROM voiture WHERE id_voiture = ? AND id_conducteur = ?");
+                    $prep_voiture->execute([$id_voiture, $id_utilisateur]);
+                    $voiture_info = $prep_voiture->fetch(PDO::FETCH_ASSOC);
+                    if (!$voiture_info) {
+                        return ['success' => false, 'message' => 'Voiture introuvable'];
+                    }               
                 // VALIDATION DU NOMBRE DE PLACES CHOISI
-                $nb_place_max = $voiture_info['nb_place'];
-                if ($nb_place_dispo < 1) {
-                    return ['success' => false, 'message' => 'Vous devez proposer au moins 1 place'];
-                }
-                if ($nb_place_dispo > $nb_place_max) {
-                    return ['success' => false, 'message' => 'Nombre de places supérieur à la capacité de votre voiture'];
-                }
-
+                    $nb_place_max = $voiture_info['nb_place'];
+                    if ($nb_place_dispo < 1) {
+                        return ['success' => false, 'message' => 'Vous devez proposer au moins 1 place'];
+                    }
+                    if ($nb_place_dispo > $nb_place_max) {
+                        return ['success' => false, 'message' => 'Nombre de places supérieur à la capacité de votre voiture'];
+                    }
             //UNE FOIS TOUT OK INSERTION DU NOUVEAU COVOIT
                 $prep_nouveau_covoit = $pdo->prepare(
                     "INSERT INTO covoiturage
@@ -102,14 +99,13 @@ class Covoiturage {
                 $duree_voyage,
                 $lieu_depart,
                 $lieu_arrive,
-                $nb_place_dispo, // UTILISATION DE LA VALEUR CHOISIE
+                $nb_place_dispo,
                 $prix_personne,
                 $id_utilisateur,
                 $id_voiture
                 ]
                 );
                 $id_covoiturage = $pdo->lastInsertId();
-
             //MAJ DES CREDIT DU CONDUCTEUR ET DE LA COMMISSION
                 $prep_credit = $pdo->prepare(
                     "UPDATE utilisateur
@@ -242,6 +238,11 @@ class Covoiturage {
 
     /**
      * permet d'afficher les information pour confirmer la participation du covoiturage
+     * @param PDO $pdo : PDO pour connexion a la bdd
+     * @param int $id_covoiturage :  Id de covoiturage
+     * @param int $id_utilisateur : Id de l'utilisateur
+     * @param int $nb_place_voulu : nombre de place que veux reserver l'utilisateur
+     * @return array ['success' => bool, 'message' => string]
      */
     public static function voirCovoituragePourParticipation(PDO $pdo, int $id_covoiturage, int $id_utilisateur,int $nb_place_voulu){
         try{
@@ -413,7 +414,7 @@ class Covoiturage {
      * @param string $lieu_arrive : lieu d'arrivé'
      * @param string $date_depart : date de départ recherché
      * @param int $nb_places_voulu_par_le_passager : nombre de place à reserver
-     * @return array ['info_covoiturage' => '', 'message' => '']
+     * @return array ['info_covoiturage' => '', 'message' => string]
      */
     public static function rechercheCovoiturage (PDO $pdo, string $lieu_depart, string $lieu_arrive, string $date_depart, int $nb_places_voulu_par_le_passager): array {
         try {
@@ -461,7 +462,16 @@ class Covoiturage {
     }
 
     /**
-     * 
+     * permet de refaure une recherche en prenant en compte les filtres
+     * @param PDO $pdo : PDO pour connexion a la bdd.
+     * @param string $lieu_depart : lieu de départ
+     * @param string $lieu_arrive : lieu d'arrivé'
+     * @param string $date_depart : date de départ recherché
+     * @param int $nb_places_voulu_par_le_passager : nombre de place à reserver
+     * @param ?string $type_energie : type de lenergie 
+     * @param ?float $prix = null : prix max demandé
+     * @param ?string $duree = null : durée max demandé
+     * @param ?float $avis = null : note de conducteur minimum demandé
      */
     public static function rechercheFiltrerCovoiturage(PDO $pdo, string $lieu_depart, string $lieu_arrive, string $date_depart, int $nb_places_voulu_par_le_passager, ?string $type_energie = null, ?float $prix = null, ?string $duree = null, ?float $avis = null): array {
         try {
@@ -539,97 +549,89 @@ class Covoiturage {
  
 
     /**
-     * supprime un covoit creer par un conducteur
+     * supprime un covoit crée par un conducteur
      * @param PDO $pdo : PDO pour connexion a la bdd.
      * @param int $id_conducteur : Id du conducteur
      * @param int $id_covoiturage :  Id de covoiturage 
-     * @return array : ['success' => bool , 'message' => ' '];
+     * @return array : ['success' => bool , 'message' => string];
      */
     public static function supprimerCovoiturage (PDO $pdo, int $id_conducteur, int $id_covoiturage): array {
         try{
             //on verifie que le covoiturage existe toujours
-            $prep_verif_covoit = $pdo->prepare(
-                "SELECT id_covoiturage
-                FROM covoiturage
-                WHERE id_covoiturage = ? 
-                ");
-            $prep_verif_covoit->execute([$id_covoiturage]);
-            $resultat_verif_covoit = $prep_verif_covoit->fetch();
-            if(!$resultat_verif_covoit){
-                return ['success' => false, 'message' => 'Covoiturage introuvable'];
-            }
-            
-
+                $prep_verif_covoit = $pdo->prepare(
+                    "SELECT id_covoiturage
+                    FROM covoiturage
+                    WHERE id_covoiturage = ? 
+                    ");
+                $prep_verif_covoit->execute([$id_covoiturage]);
+                $resultat_verif_covoit = $prep_verif_covoit->fetch();
+                if(!$resultat_verif_covoit){
+                    return ['success' => false, 'message' => 'Covoiturage introuvable'];
+                }
             //PREPARATION POUR SUPPRIMER LE COVOIT
-
-            $pdo->beginTransaction();
-
+                $pdo->beginTransaction();
             //ANNULE DES DEUX TABLES POUR LE COVOIT
-            $prep_annule_covoiturage = $pdo->prepare(
-                "UPDATE covoiturage
-                SET statut_covoit = ?
-                WHERE id_covoiturage = ?
-                ");
-            $prep_annule_covoiturage->execute(['annuler',$id_covoiturage]);
+                $prep_annule_covoiturage = $pdo->prepare(
+                    "UPDATE covoiturage
+                    SET statut_covoit = ?
+                    WHERE id_covoiturage = ?
+                    ");
+                $prep_annule_covoiturage->execute(['annuler',$id_covoiturage]);
 
-            $prep_annule_reservation = $pdo->prepare(
-                "UPDATE reservation
-                SET statut_reservation = ?
-                WHERE id_covoiturage = ?
-                ");
-            $prep_annule_reservation->execute(['annuler',$id_covoiturage]);  
-
+                $prep_annule_reservation = $pdo->prepare(
+                    "UPDATE reservation
+                    SET statut_reservation = ?
+                    WHERE id_covoiturage = ?
+                    ");
+                $prep_annule_reservation->execute(['annuler',$id_covoiturage]);  
             //ON REDONNE LES CREDITS A CHAQUE UTILISATEUR
-            //pour le conducteur
-            $prepare_remboursement_conducteur = $pdo->prepare(
-                "UPDATE utilisateur
-                SET credit = credit + ?
-                WHERE id_utilisateur = ?
-            ");
-            $prepare_remboursement_conducteur->execute([2,$id_conducteur]);
-
-            //maj de commission
-            $prepare_remboursement_commission = $pdo->prepare(
-                "INSERT INTO commission (id_covoiturage,id_conducteur,montant)
-                VALUES (?,?,?)
-                ");
-            $prepare_remboursement_commission->execute([$id_covoiturage,$id_conducteur,-2]);
-
-            //pour chaque passager
-            //on prepare les donnees a maj
-            $prepare_liste_passager = $pdo->prepare(
-                "SELECT r.nb_place_reserve,r.id_passager,c.prix_personne
-                FROM reservation r INNER JOIN covoiturage c ON r.id_covoiturage = c.id_covoiturage
-                AND r.id_covoiturage = ?
-                ");
-            $prepare_liste_passager->execute([$id_covoiturage]);
-            $liste_passagers = $prepare_liste_passager->fetchAll();
-            
+                //pour le conducteur
+                    $prepare_remboursement_conducteur = $pdo->prepare(
+                        "UPDATE utilisateur
+                        SET credit = credit + ?
+                        WHERE id_utilisateur = ?
+                    ");
+                    $prepare_remboursement_conducteur->execute([2,$id_conducteur]);
+                //maj de commission
+                    $prepare_remboursement_commission = $pdo->prepare(
+                        "INSERT INTO commission (id_covoiturage,id_conducteur,montant)
+                        VALUES (?,?,?)
+                        ");
+                    $prepare_remboursement_commission->execute([$id_covoiturage,$id_conducteur,-2]);
+                //pour chaque passager
+                //on prepare les donnees a maj
+                    $prepare_liste_passager = $pdo->prepare(
+                        "SELECT r.nb_place_reserve,r.id_passager,c.prix_personne
+                        FROM reservation r INNER JOIN covoiturage c ON r.id_covoiturage = c.id_covoiturage
+                        AND r.id_covoiturage = ?
+                        ");
+                    $prepare_liste_passager->execute([$id_covoiturage]);
+                    $liste_passagers = $prepare_liste_passager->fetchAll();
             //on met a jour le statut du virement et on insere le remboursement
-            foreach($liste_passagers as $passager){
-                $id_passager = $passager['id_passager'];
-                $montant = $passager['nb_place_reserve'] * $passager['prix_personne'];
-                $prepare_remboursement_passager = $pdo->prepare(
-                    "UPDATE utilisateur
-                    SET credit = credit + ? 
-                    WHERE id_utilisateur = ?
-                    ");
-                $prepare_remboursement_passager->execute([$montant,$passager['id_passager']]);
+                foreach($liste_passagers as $passager){
+                    $id_passager = $passager['id_passager'];
+                    $montant = $passager['nb_place_reserve'] * $passager['prix_personne'];
+                    $prepare_remboursement_passager = $pdo->prepare(
+                        "UPDATE utilisateur
+                        SET credit = credit + ? 
+                        WHERE id_utilisateur = ?
+                        ");
+                    $prepare_remboursement_passager->execute([$montant,$passager['id_passager']]);
 
-                $prep_virement_annuler_passager = $pdo->prepare(
-                    "UPDATE virement 
-                    SET statut = ?
-                    WHERE id_passager = ?
-                    AND id_covoiturage = ?
-                ");
-                $prep_virement_annuler_passager->execute(['annuler',$passager['id_passager'],$id_covoiturage]);
-
-                $prep_virement_passager = $pdo->prepare(
-                    "INSERT INTO virement (montant_virement,statut,id_passager,id_conducteur,id_covoiturage)
-                    VALUES (?,?,?,?,?)
+                    $prep_virement_annuler_passager = $pdo->prepare(
+                        "UPDATE virement 
+                        SET statut = ?
+                        WHERE id_passager = ?
+                        AND id_covoiturage = ?
                     ");
-                $prep_virement_passager->execute([$montant,'remboursement',$id_passager,$id_conducteur,$id_covoiturage]);
-            }
+                    $prep_virement_annuler_passager->execute(['annuler',$passager['id_passager'],$id_covoiturage]);
+
+                    $prep_virement_passager = $pdo->prepare(
+                        "INSERT INTO virement (montant_virement,statut,id_passager,id_conducteur,id_covoiturage)
+                        VALUES (?,?,?,?,?)
+                        ");
+                    $prep_virement_passager->execute([$montant,'remboursement',$id_passager,$id_conducteur,$id_covoiturage]);
+                }
 
             $pdo->commit();
 
@@ -647,7 +649,7 @@ class Covoiturage {
      * @param PDO $pdo : PDO pour connexion a la bdd.
      * @param int $id_passager : Id du passager
      * @param int $id_covoiturage :  Id de covoiturage 
-     * @return array : ['success' => bool , 'message' => ' '];
+     * @return array : ['success' => bool , 'message' => string];
      */
     public static function annulerCovoiturage (PDO $pdo, int $id_passager, int $id_covoiturage, ): array {
 
@@ -731,6 +733,14 @@ class Covoiturage {
                         WHERE id_covoiturage = ?
                     ");
                     $prep_nb_place->execute([$nb_place_reserve['nb_place_reserve'],$id_covoiturage]);
+
+                //on rembourse le passager
+                    $prep_remboursement_p = $pdo->prepare(
+                        "UPDATE utilisateur
+                        SET credit = credit + ?
+                        WHERE id_utilisateur = ?
+                    ");
+                    $prep_remboursement_p->execute([$montant_rembourser['montant_virement'],$id_passager]);
             
             $pdo->commit();
 
@@ -746,7 +756,10 @@ class Covoiturage {
     
     /**
      * demarre un covoit creer par un conducteur
-     * 
+     * @param PDO $pdo : PDO pour connexion a la bdd.
+     * @param int $id_conducteurr : Id du conducteur
+     * @param int $id_covoiturage :  Id de covoiturage 
+     * @return array : ['success' => bool , 'message' => string]; 
      */
     public static function demarrerCovoiturage (PDO $pdo, int $id_conducteur, int $id_covoiturage): array {
         try{
@@ -769,7 +782,6 @@ class Covoiturage {
                     return ['success' => false, 'message' => 'Il est trop tôt pour démarrer le covoiturage'];
                 }
 
-
             //DEMARRAGE DU COVOIT
             //Mis a jour du statut du covoit
                 $prep_maj_statut_covoit = $pdo->prepare(
@@ -790,7 +802,10 @@ class Covoiturage {
 
     /**
      * permet de valider un covoiturage qui vient davoir lieu
-     * 
+     * @param PDO $pdo : PDO pour connexion a la bdd.
+     * @param int $id_conducteurr : Id du conducteur
+     * @param int $id_covoiturage :  Id de covoiturage 
+     * @return array : ['success' => bool , 'message' => string]; 
      */
     public static function terminerCovoiturage (PDO $pdo, int $id_conducteur, int $id_covoiturage){
         try{
@@ -816,15 +831,6 @@ class Covoiturage {
                 ");
                 $prep_maj_statut_covoit->execute(['terminer',$id_conducteur,$id_covoiturage]);
 
-            //ET DES RESERVATIONS
-                $prep_maj_reservation = $pdo->prepare(
-                    "UPDATE reservation
-                    SET statut_reservation = ?
-                    WHERE id_covoiturage = ?"
-                );
-                $prep_maj_reservation->execute(['terminer', $id_covoiturage]);
-
-
             //RECUPERATION DES EMAIL DES PARTICIPANTS POUR LES INVITER A NOTER
                 $prep_email = $pdo->prepare(
                     "SELECT email
@@ -847,6 +853,11 @@ class Covoiturage {
 
     /**
      * permet de donner les avis pour le covoiturage
+     * @param PDO $pdo : PDO pour connexion a la bdd.
+     * @param int $id_covoiturage :  Id de covoiturage 
+     * @param int $id_passager : Id du passager
+     * @param array $data : donner en post pour les avis
+     * @return array : ['success' => bool , 'message' => string];
      */
     public static function donnerAvis(PDO $pdo, int $id_covoiturage, int $id_passager, array $data){
         try{
@@ -901,7 +912,11 @@ class Covoiturage {
     }
 
     /**
-     * 
+     * permet de confirmer un covoiturage coté passager pour boucler le covoiturage
+     * @param PDO $pdo : PDO pour connexion a la bdd.
+     * @param int $id_utilisateur :  Id de utilisateur 
+     * @param int $id_covoiturage :  Id de covoiturage 
+     * @return array : ['success' => bool , 'message' => string];
      */
     public static function confirmerCovoiturage($pdo, $id_utilisateur, $id_covoiturage) {
         try {

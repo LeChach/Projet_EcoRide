@@ -57,8 +57,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <h3>Nous vous répondrons rapidement !</h3>
                 <p>Notre équipe s'engage à répondre à votre message dans les 24h.</p>
                 <p>Vous pouvez aussi nous joindre directement :</p>
-                <p>📧 <a href="mailto:support@ecoride.fr">support@ecoride.fr</a></p>
-                <p>📞 <a href="tel:+33123456789">01 23 45 67 89</a></p>
+                <p><a href="mailto:support@ecoride.fr">support@ecoride.fr</a></p>
+                <p><a href="tel:+33123456789">01 23 45 67 89</a></p>
             </div>
             
         <?php else: ?>
@@ -98,9 +98,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Section informations de contact -->
             <div class="contact-info">
                 <h3>Autres moyens de nous contacter</h3>
-                <p>📧 Email : <a href="mailto:support@ecoride.fr">support@ecoride.fr</a></p>
-                <p>📞 Téléphone : <a href="tel:+33123456789">01 23 45 67 89</a></p>
-                <p>🕐 Du lundi au vendredi, de 9h à 18h</p>
+                <p>Email : <a href="mailto:support@ecoride.fr">support@ecoride.fr</a></p>
+                <p>Téléphone : <a href="tel:+33123456789">01 23 45 67 89</a></p>
+                <p>Du lundi au vendredi, de 9h à 18h</p>
             </div>
             
         <?php endif; ?>

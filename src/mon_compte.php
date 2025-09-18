@@ -100,6 +100,10 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
             }
             header('Location: mon_compte.php');
             exit;
+            $fonction2 = Covoiturage::confirmerCovoiturage($pdo, $id_utilisateur, $_POST['id_covoiturage']);
+            if(!$fonction2['success']){
+                $_SESSION['erreur'] = $fonction['message'];
+            }
             
         case 'valider_avis':
             $fonction = MonCompte::changerAvis($pdo,$_POST['id_avis'],$_POST);
@@ -237,10 +241,10 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
             <!-- Section Statut utilisateur -->
             <?php 
             $isPassenger = false;
-            $isDrvier = false;
+            $isDriver = false;
             switch ($info_utilisateur['info_utilisateur']['type_utilisateur']) {
                 case 'Passager': $isPassenger = true; break;
-                case 'Conducteur' : $isConducteur = true; break;
+                case 'Conducteur' : $isDriver = true; break;
                 case 'Passager et Conducteur': $isPassenger = true; $isDriver=true; break;
             }
             ?>
@@ -407,54 +411,76 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
 
             <!-- Covoiturages passager en cours -->
             <?php if($isPassenger): ?>
-            <section class="account-section">
-                <h2>Mes Participations en Cours</h2>
-                
-                <?php if(empty($covoit_planifier_encours)): ?>
-                    <div class="empty-state">Vous ne participez à aucun covoiturage</div>
-                <?php else: ?>
-                    <div class="covoiturage-grid">
-                        <?php foreach ($covoit_planifier_encours as $covoiturage): ?>
-                            <?php if($covoiturage['statut_covoit'] === 'terminer' || $covoiturage['statut_covoit'] === 'annuler') continue; ?>
-                            
-                            <div class="covoiturage_card">
-                                <div class="div_covoit">
-                                    <div class="date_covoit">
-                                        <span>Le <?= date('d/m/Y',strtotime($covoiturage['date_depart']))?></span>
-                                    </div>
-                                    
-                                    <div class="trajet_heures">
-                                        <div class="trajet">
-                                            <p><?= htmlspecialchars($covoiturage['lieu_depart'])?></p>
-                                            <p><?= substr($covoiturage['duree_voyage'], 0, 5) ?></p>
-                                            <p><?= htmlspecialchars($covoiturage['lieu_arrive'])?></p>
+                <section class="account-section">
+                    <h2>Mes Participations en Cours</h2>
+
+                    <?php 
+                    $covoit_planifier_encours = array_filter($info_utilisateur['info_covoiturage_p'], function($c){
+                    return in_array($c['statut_covoit'], ['planifier', 'en_cours', 'terminer']) 
+                        && $c['statut_reservation'] === 'active';
+                    });
+                    ?>
+
+                    <?php if(empty($info_utilisateur['info_covoiturage_p'])): ?>
+                        <div class="empty-state">Vous ne participez à aucun covoiturage</div>
+                    <?php else: ?>
+                        <div class="covoiturage-grid">
+                            <?php foreach ($info_utilisateur['info_covoiturage_p'] as $covoiturage): ?>
+                                <?php if($covoiturage['statut_reservation'] !== 'active') continue; ?>
+                                <div class="covoiturage_card">
+                                    <div class="div_covoit">
+                                        <div class="date_covoit">
+                                            <span>Le <?= date('d/m/Y', strtotime($covoiturage['date_depart'])) ?></span>
                                         </div>
-                                        <div class="heure">
-                                            <p><?= substr($covoiturage['heure_depart'], 0, 5) ?></p>
-                                            <p>🚗</p>
-                                            <p><?= date('H:i', strtotime($covoiturage['heure_depart']) + strtotime($covoiturage['duree_voyage']) - strtotime('00:00:00')) ?></p>
+
+                                        <div class="trajet_heures">
+                                            <div class="trajet">
+                                                <p><?= htmlspecialchars($covoiturage['lieu_depart']) ?></p>
+                                                <p><?= substr($covoiturage['duree_voyage'], 0, 5) ?></p>
+                                                <p><?= htmlspecialchars($covoiturage['lieu_arrive']) ?></p>
+                                            </div>
+                                            <div class="heure">
+                                                <p><?= substr($covoiturage['heure_depart'], 0, 5) ?></p>
+                                                <p>🚗</p>
+                                                <p><?= date('H:i', strtotime($covoiturage['heure_depart']) + strtotime($covoiturage['duree_voyage']) - strtotime('00:00:00')) ?></p>
+                                            </div>
                                         </div>
-                                    </div>
-                                    
-                                    <div class="actions_covoit">
-                                        <span><?= htmlspecialchars($covoiturage['nb_place_reserve'])?> place<?= ($covoiturage['nb_place_reserve'] > 1) ? 's' : '' ?> réservée<?= ($covoiturage['nb_place_reserve'] > 1) ? 's' : '' ?></span>
-                                        
-                                        <?php if($covoiturage['statut_covoit'] === 'planifier'): ?>
-                                            <form method="POST" style="display: inline;">
-                                                <input type="hidden" name="type_POST" value="annuler_covoiturage">
-                                                <input type="hidden" name="id_covoiturage" value="<?=$covoiturage['id_covoiturage']?>">
-                                                <button type="submit" class="btn btn-secondary btn-small" onclick="return confirm('Êtes-vous sûr ?')">Annuler</button>
-                                            </form>
-                                        <?php elseif($covoiturage['statut_covoit'] === 'en_cours'): ?>
-                                            <span class="badge">Covoiturage en cours</span>
-                                        <?php endif; ?>
+
+                                        <div class="actions_covoit">
+                                            <span>
+                                                <?= htmlspecialchars($covoiturage['nb_place_reserve']) ?>
+                                                place<?= ($covoiturage['nb_place_reserve'] > 1) ? 's' : '' ?> réservée<?= ($covoiturage['nb_place_reserve'] > 1) ? 's' : '' ?>
+                                            </span>
+
+                                            <?php if($covoiturage['statut_covoit'] === 'planifier'): ?>
+                                                <form method="POST" action="mon_compte.php" style="display: inline;">
+                                                    <input type="hidden" name="type_POST" value="annuler_covoiturage">
+                                                    <input type="hidden" name="id_covoiturage" value="<?=$covoiturage['id_covoiturage']?>">
+                                                    <button type="submit" class="btn btn-secondary btn-small" onclick="return confirm('Êtes-vous sûr ?')">Annuler</button>
+                                                </form>
+                                            <?php elseif($covoiturage['statut_covoit'] === 'en_cours'): ?>
+                                                <span class="badge">Covoiturage en cours</span>
+
+                                            <?php elseif($covoiturage['statut_covoit'] === 'terminer'): ?>
+                                                <form method="POST" action="mon_compte.php" class="confirmation-form" style="display:inline;">
+                                                    <input type="hidden" name="type_POST" value="confirmer_covoiturage">
+                                                    <input type="hidden" name="id_covoiturage" value="<?= $covoiturage['id_covoiturage'] ?>">
+                                                    <button type="submit" name="action" value="confirmer" class="btn btn-secondary btn-small" 
+                                                    onclick="return confirm('Confirmer sans donner d\'avis ?')">
+                                                    Confirmer sans donner votre avis
+                                                    </button>
+                                                </form>
+                                                <a href="donner_avis.php?id_c=<?= $covoiturage['id_covoiturage'] ?>" class="btn btn-primary btn-small">
+                                                Donner votre avis
+                                                </a>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
-            </section>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </section>
             <?php endif; ?>
 
             <!-- Section Historiques -->
@@ -487,7 +513,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                                     </div>
                                     
                                     <div class="actions_covoit">
-                                        <span><?= htmlspecialchars($h_covoit_c['nb_place_dispo'])?> passager<?= ($h_covoit_c['nb_place_dispo'] > 1) ? 's' : '' ?></span>
+                                        <span><?= htmlspecialchars($h_covoit_c['nb_place_dispo'])?> place<?= ($h_covoit_c['nb_place_dispo'] > 1) ? 's' : '' ?> libre<?= ($h_covoit_c['nb_place_dispo'] > 1) ? 's' : '' ?></span>
                                         <span class="badge <?= $h_covoit_c['statut_covoit'] === 'terminer' ? 'badge-success' : 'badge-secondary' ?>"><?= htmlspecialchars($h_covoit_c['statut_covoit'])?></span>
                                         
                                         <?php if($h_covoit_c['statut_covoit'] === 'terminer'): ?>
@@ -533,16 +559,6 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                                     
                                     <div class="actions_covoit">
                                         <span><?= htmlspecialchars($h_covoit_p['nb_place_reserve'])?> passager<?= ($h_covoit_p['nb_place_reserve'] > 1) ? 's' : '' ?></span>
-                                        <form method="POST" action="mon_compte.php" class="confirmation-form">
-                                            <input type="hidden" name="type_POST" value="confirmer_covoiturage">
-                                            <input type="hidden" name="id_covoiturage" value="<?= $h_covoit_p['id_covoiturage'] ?>">
-                                            <button type="submit" name="action" value="confirmer" class="btn btn-primary btn-small">
-                                                ✅ Confirmer le covoiturage
-                                            </button>    
-                                        </form>                                    
-                                        <?php if($h_covoit_p['statut_covoit'] === 'terminer'): ?>
-                                            <a href="donner_avis.php?id_c=<?=$h_covoit_p['id_covoiturage']?>" class="btn btn-primary btn-small">Donner un avis</a>
-                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>

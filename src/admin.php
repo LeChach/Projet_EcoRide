@@ -61,11 +61,11 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             <!-- Section Graphiques -->
             <div class="dashboard-graphs">
                 <div class="graph-card">
-                    <h3>📊 Covoiturages par jour</h3>
+                    <h3>Covoiturages par jour</h3>
                     <canvas id="graphCovoit"></canvas>
                 </div>
                 <div class="graph-card">
-                    <h3>💹 Crédits gagnés par jour</h3>
+                    <h3>Crédits gagnés par jour</h3>
                     <canvas id="graphCredits"></canvas>
                 </div>
             </div>
@@ -79,7 +79,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             <div class="user-management">
                 <h2>👥 Gestion des comptes</h2>
                 
-                <!-- En-tête optionnel pour les colonnes -->
+                <!-- En-tête pour les colonnes -->
                 <div class="user-header">
                     <span>Pseudo</span>
                     <span>Email</span>
@@ -108,20 +108,20 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                         <form action="admin.php" method="POST" style="display: inline;">
                             <input type="hidden" name="type_POST" value="nouveau_employe">
                             <input type="hidden" name="id_utilisateur" value="<?= $user['id_utilisateur'] ?>">
-                            <button type="submit">👔 Promouvoir Employé</button>
+                            <button type="submit">Promouvoir Employé</button>
                         </form>
 
                         <form method="POST" action="admin.php" style="display: inline;">
                             <input type="hidden" name="type_POST" value="ban">
                             <input type="hidden" name="id_utilisateur" value="<?= $user['id_utilisateur'] ?>">
-                            <button type="submit">🚫 Suspendre</button>
+                            <button type="submit">Suspendre</button>
                         </form>
                     </div>
                 <?php endforeach; ?>
             </div>
 
             <div class="admin-close-section">
-                <a href="mon_compte.php" class="admin-close-button">🔙 Fermer l'administration</a>
+                <a href="mon_compte.php" class="admin-close-button">Fermer l'administration</a>
             </div>
         </div>
     </main>

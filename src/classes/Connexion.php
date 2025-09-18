@@ -7,12 +7,10 @@ class Connexion {
      * @param PDO $pdo lien avec la bdd
      * @param array $array liste de donnée du formulaire
      * @return array ['success' => bool, 'message' => '', 'id_utilisateur => ''];
-
      */ 
     public static function inscriptionMonCompte (PDO $pdo, array $data): array {
 
         try{
-
             $sexe = $data['sexe'];
             $pseudo = $data['pseudo'] ?? '';
             $mot_de_passe = $data['password'] ?? '';
@@ -20,7 +18,7 @@ class Connexion {
             $telephone = trim($data['phone']) ?? '';
             $type_u = $data['type_utilisateur'];
 
-            //gestion de la preference ladies_only non null si nouvelle utilisateur = femme
+            //GESTION PREFERENCE LIE AUX FEMMES
             if($sexe == 'Femme'){
                 $pref_ladies = 'refuser';
             }else{
@@ -56,43 +54,42 @@ class Connexion {
             }
 
             //INSERTION DES DONNEES
-            //démarre une transaction pour valider toute les requete et empeche linscription si une table na pas eu de insert into
-            $pdo->beginTransaction();
-            //besoin de hacher le mdp pour secu++
-            $mot_de_passe_hshd = password_hash($mot_de_passe,PASSWORD_DEFAULT);
+                $pdo->beginTransaction();
 
-            //PREPARATION POUR UTILISATEUR
-            $prep_utilisateur = $pdo->prepare(
-            "INSERT INTO utilisateur (pseudo,email,mot_de_passe,sexe,telephone,type_utilisateur)
-            VALUES (?,?,?,?,?,?)"
-            );
-            $prep_utilisateur->execute([$pseudo,$email,$mot_de_passe_hshd,$sexe,$telephone,$type_u]);
-            $id_utilisateur = $pdo->lastInsertId();
+                $mot_de_passe_hshd = password_hash($mot_de_passe,PASSWORD_DEFAULT);
 
-            //PREPARATION POUR PREFERENCE
-            $prep_preference = $pdo->prepare(
-                "INSERT INTO preference (id_utilisateur,ladies_only)
-                VALUES (?,?)"
-            );
-            $prep_preference->execute([$id_utilisateur,$pref_ladies]);
+                //PREPARATION POUR UTILISATEUR
+                    $prep_utilisateur = $pdo->prepare(
+                        "INSERT INTO utilisateur (pseudo,email,mot_de_passe,sexe,telephone,type_utilisateur)
+                        VALUES (?,?,?,?,?,?)"
+                        );
+                    $prep_utilisateur->execute([$pseudo,$email,$mot_de_passe_hshd,$sexe,$telephone,$type_u]);
+                    $id_utilisateur = $pdo->lastInsertId();
 
-            //PREPARATION POUR POSSEDE
-            $prep_possede = $pdo->prepare(
-                "INSERT INTO possede (id_utilisateur,id_role)
-                VALUES (?,1)"
-            );
-            $prep_possede->execute([$id_utilisateur]);
+                //PREPARATION POUR PREFERENCE
+                    $prep_preference = $pdo->prepare(
+                        "INSERT INTO preference (id_utilisateur,ladies_only)
+                        VALUES (?,?)"
+                    );
+                    $prep_preference->execute([$id_utilisateur,$pref_ladies]);
+
+                //PREPARATION POUR POSSEDE
+                    $prep_possede = $pdo->prepare(
+                        "INSERT INTO possede (id_utilisateur,id_role)
+                        VALUES (?,1)"
+                    );
+                    $prep_possede->execute([$id_utilisateur]);
 
 
-            $pdo->commit();
+                $pdo->commit();
 
             return ['success' => true, 'message' => 'Création de compte Valide', 'id_utilisateur' => $id_utilisateur];
 
         } catch (PDOException $e){
+            error_log($e->getMessage());
             $pdo->rollBack();
             return ['success' => false , 'message' => 'Création de compte non Valide', 'id_utilisateur' => null];
         }
-
     }
 
     /**
@@ -133,7 +130,6 @@ class Connexion {
             error_log($e->getMessage());
             return ['success' => false, 'message' => 'Echec de connexion'];
         }
-        
     }
 }
 ?>
