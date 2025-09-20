@@ -46,9 +46,10 @@ class Covoiturage {
                         FROM covoiturage
                         WHERE id_voiture = ?
                         AND date_depart = ?
-                        AND heure_depart = ?"
+                        AND heure_depart = ?
+                        AND statut_covoit = ?"
                     );
-                    $prep_voiture_dispo->execute([$id_voiture,$date_depart,$heure_depart]);
+                    $prep_voiture_dispo->execute([$id_voiture,$date_depart,$heure_depart,'planifier']);
                     $voiture_dispo = $prep_voiture_dispo->fetch(PDO::FETCH_ASSOC);
                     if($voiture_dispo['nbr']>0){
                         return ['success' => false, 'message' => 'Voiture déjà prise'];
