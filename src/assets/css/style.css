@@ -2064,13 +2064,21 @@ footer .logo img {
         border-radius: var(--radius-medium);
         width: calc(100% - 20px);
         margin: 0 10px; 
+        gap: var(--spacing-md);
+    }
+
+    .bar_de_recherche form {
+        flex-direction: column; /* AJOUT CRUCIAL */
+        gap: var(--spacing-md); /* AUGMENTÉ */
+        align-items: stretch; /* AJOUT pour étirer les éléments */
     }
     
     .search-block {
-        min-width: 120px;
-        flex: 1 1 120px;
+        min-width: unset;
+        flex: none;
+        width: 100%;
         gap: 5px;
-        padding: 6px 8px;
+        padding: 12px 15px;
     }
     
     .search-block label {
@@ -2079,15 +2087,17 @@ footer .logo img {
     
     .search-block input {
         font-size: 16px;
-        padding: 4px 2px;
+        padding: 8px 5px;
         min-width: 0;
     }
     
     .bouton_recherche {
-        font-size: 13px;
-        padding: 8px 15px;
+        width: 100%;
+        font-size: 16px;
+        padding: 12px 20px;
         border-radius: var(--radius-large);
         min-width: 80px;
+        margin-top: var(--spacing-sm);
     }
     
     /* Information mobile */
