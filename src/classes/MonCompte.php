@@ -306,6 +306,19 @@ class MonCompte {
                 if($prep_voiture->rowCount() < 1){
                     return ['success' => false , 'message' => 'Erreur, Voiture inexistante']; 
                 }
+
+            //VERIFICATION que la voiture n'a pas déja d'historique (protection de donnée)
+                    $prep_check_usage = $pdo->prepare(
+                        "SELECT COUNT(*) as nb_covoit 
+                        FROM covoiturage 
+                        WHERE id_voiture = ?"
+                    );
+                    $prep_check_usage->execute([$id_voiture]);
+                    $usage = $prep_check_usage->fetch();
+
+                    if($usage['nb_covoit'] > 0) {
+                        return ['success' => false, 'message' => 'Impossible de supprimer : véhicule utilisé dans des covoiturages'];
+                    }
             //PREPARATION POUR SUPPRIMER VOITURE
                 $prep_voiture_supp = $pdo->prepare(
                     "DELETE FROM voiture
@@ -317,7 +330,7 @@ class MonCompte {
 
         } catch (PDOException $e) {
             error_log($e->getMessage());
-            return ['success' => false, 'message' => 'Echec du changement des données'];
+            return ['success' => false, 'message' => 'Echec de suppression de la voiture'];
         }
     }
  
