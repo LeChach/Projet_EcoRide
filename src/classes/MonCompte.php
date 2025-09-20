@@ -17,9 +17,11 @@ class MonCompte {
                     "SELECT * 
                     FROM utilisateur 
                     WHERE id_utilisateur = ?"
-                    );                 
+                    );
+                    
                 $prep_utilisateur->execute([$id_utilisateur]);
                 $info_utilisateur = $prep_utilisateur->fetch(PDO::FETCH_ASSOC);
+
             //PREPARATION DE LA TABLE PREFERENCE
                 $prep_pref = $pdo->prepare(
                         "SELECT 
@@ -36,7 +38,7 @@ class MonCompte {
                     );   
                 $prep_pref->execute([$id_utilisateur]);
                 $pref_utilisateur = $prep_pref->fetch(PDO::FETCH_ASSOC);
-    
+
             //PREPARATION DE LA TABLE VOITURE
                 $prep_voiture = $pdo->prepare(
                     "SELECT * 
@@ -45,7 +47,6 @@ class MonCompte {
                 );
                 $prep_voiture->execute([$id_utilisateur]);
                 $voitures_utilisateur = $prep_voiture->fetchAll();
-
 
             //PREPARATION DE LA TABLE COVOITURAGE = pour quand je suis conducteur
                 $prep_covoit_conducteur = $pdo->prepare(
@@ -62,17 +63,16 @@ class MonCompte {
                     FROM covoiturage c
                     INNER JOIN reservation r ON c.id_covoiturage = r.id_covoiturage
                     WHERE r.id_passager = ?
-                    AND r.statut_reservation = ?
+                    AND r.statut_reservation = 'active'
                     AND c.statut_covoit IN ('planifier', 'en_cours', 'terminer')"
                 );
-                $prep_covoit_passager->execute([$id_utilisateur,'active']);
+                $prep_covoit_passager->execute([$id_utilisateur]);
                 $covoit_passager = $prep_covoit_passager->fetchAll(PDO::FETCH_ASSOC);
-           
+        
             //PREPARATION DE LHISTORIQUE DU CONDUCTEUR
                 $prep_historique_c = $pdo->prepare(
-                    "SELECT c.*,a.*
+                    "SELECT c.*
                     FROM covoiturage c
-                    LEFT JOIN avis a ON c.id_covoiturage = a.id_covoiturage
                     WHERE c.id_conducteur = ?
                     AND (c.statut_covoit = ? OR c.statut_covoit = ?)
                     ORDER BY c.date_depart DESC
@@ -82,18 +82,17 @@ class MonCompte {
 
             //PREPARATION DE LHISTORIQUE DU PASSAGER
                 $prep_historique_p = $pdo->prepare(
-                    "SELECT c.*, a.*, r.*
+                    "SELECT c.*, r.*
                     FROM covoiturage c
                     INNER JOIN reservation r ON c.id_covoiturage = r.id_covoiturage
-                    LEFT JOIN avis a ON c.id_covoiturage = a.id_covoiturage 
-                    AND a.statut_avis = 'valider'
                     WHERE r.id_passager = ?
                     AND (c.statut_covoit = ? OR c.statut_covoit = ?)
-                    AND r.statut_reservation = ?
+                    AND r.statut_reservation = 'terminer'
                     ORDER BY c.date_depart DESC
                     ");
-                $prep_historique_p->execute([$id_utilisateur, 'terminer', 'annuler','terminer']);
+                $prep_historique_p->execute([$id_utilisateur, 'terminer', 'annuler']);
                 $historique_p = $prep_historique_p->fetchAll(PDO::FETCH_ASSOC);
+
             //RECUPERATION DU ROLE DE LUTILISATEUR
                 $prep_role = $pdo->prepare(
                     "SELECT libelle
@@ -102,6 +101,7 @@ class MonCompte {
                 ");
                 $prep_role->execute([$id_utilisateur]);
                 $role = $prep_role->fetchAll(PDO::FETCH_ASSOC);
+
             //RECUPERATION DU NOMBRE DAVIS EN ATTENTE POUR EMPLOYE
                 $prep_avis_attente = $pdo->prepare(
                     "SELECT COUNT(*) as nb_attente 
@@ -124,6 +124,7 @@ class MonCompte {
                     'info_role' => $role,
                     'info_avis_attente' => $nb_attente                  
             ];
+
         } catch (PDOException $e) {
             error_log($e->getMessage());
             return ['success' => false, 'message' => 'Echec de la récupération des données'];

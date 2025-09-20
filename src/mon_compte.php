@@ -1,5 +1,5 @@
 <?php
-require_once 'connexion/log.php';
+require_once 'config/database.php';
 require_once 'connexion/session_prive.php';
 require_once 'classes/MonCompte.php';
 require_once 'classes/Connexion.php';
@@ -97,13 +97,14 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
             $fonction = Covoiturage::donnerAvis($pdo,$_POST['id_covoiturage'],$id_utilisateur,$_POST);
             if(!$fonction['success']){
                 $_SESSION['erreur'] = $fonction['message'];
+            }else{
+                $fonction2 = Covoiturage::confirmerCovoiturage($pdo, $id_utilisateur, $_POST['id_covoiturage']);
+                if(!$fonction2['success']){
+                    $_SESSION['erreur'] = $fonction['message'];
+                }
             }
             header('Location: mon_compte.php');
             exit;
-            $fonction2 = Covoiturage::confirmerCovoiturage($pdo, $id_utilisateur, $_POST['id_covoiturage']);
-            if(!$fonction2['success']){
-                $_SESSION['erreur'] = $fonction['message'];
-            }
             
         case 'valider_avis':
             $fonction = MonCompte::changerAvis($pdo,$_POST['id_avis'],$_POST);

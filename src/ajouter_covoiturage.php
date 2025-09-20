@@ -1,5 +1,5 @@
 <?php
-require_once 'connexion/log.php';
+require_once 'config/database.php';
 require_once 'connexion/session_prive.php';
 require_once 'classes/Covoiturage.php';
 require_once 'classes/MonCompte.php';

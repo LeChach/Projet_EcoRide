@@ -151,11 +151,25 @@ class Covoiturage {
                 $prep_covoit->execute([$id_covoiturage]);
                 $covoit_info = $prep_covoit->fetch(PDO::FETCH_ASSOC);
 
-            //petite verif si le covoit existe tjrs
+            //Vérification si le covoit existe tjrs
                 if (!$covoit_info) {
                     return ['success'=>false, 'message'=>'Covoiturage introuvable'];
                 }
 
+            // Vérification du solde avant débit
+
+            $prix_total = $nb_place_voulu * $covoit_info['prix_personne'];
+            $place_dispo_maj = $covoit_info['nb_place_dispo'] - $nb_place_voulu;
+            
+            $prep_check_solde = $pdo->prepare(
+                "SELECT credit FROM utilisateur WHERE id_utilisateur = ?"
+            );
+            $prep_check_solde->execute([$id_utilisateur]);
+            $solde_actuel = $prep_check_solde->fetch()['credit'];
+
+            if ($solde_actuel < $prix_total) {
+                return ['success' => false, 'message' => 'Solde insuffisant pour ce covoiturage'];
+            }
             
             $pdo->beginTransaction();
 
@@ -173,10 +187,6 @@ class Covoiturage {
                 $id_utilisateur, 
                 $covoit_info['id_conducteur'], 
                 $id_covoiturage]);
-
-            //CHERCHER SOLDE + COUT CREDIT DE UTILISATEUR POUR MAJ APRES CAR ICI MAJ AVEC VALEUR VIDE
-                $prix_total = $nb_place_voulu * $covoit_info['prix_personne'];
-                $place_dispo_maj = $covoit_info['nb_place_dispo'] - $nb_place_voulu;
 
             //ON ACTUALISE LE SOLDE DE CREDIT DU PARTICIPANT
                 $prep_credit_passager = $pdo->prepare(

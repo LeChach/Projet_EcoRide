@@ -11,12 +11,19 @@ class Connexion {
     public static function inscriptionMonCompte (PDO $pdo, array $data): array {
 
         try{
-            $sexe = $data['sexe'];
-            $pseudo = $data['pseudo'] ?? '';
+            $pseudo = trim($data['pseudo'] ?? '');
+            if (strlen($pseudo) < 3 || strlen($pseudo) > 50) {
+                return ['success' => false, 'message' => 'Pseudo invalide (3-50 caractères)'];
+            }
             $mot_de_passe = $data['password'] ?? '';
             $email = trim($data['email']) ?? '';
             $telephone = trim($data['phone']) ?? '';
             $type_u = $data['type_utilisateur'];
+
+            $sexe = in_array($data['sexe'], ['Homme', 'Femme', 'Non précisé']) ? $data['sexe'] : null;
+            if (!$sexe) {
+                return ['success' => false, 'message' => 'Sexe invalide'];
+            }
 
             //GESTION PREFERENCE LIE AUX FEMMES
             if($sexe == 'Femme'){
