@@ -22,11 +22,19 @@ function transliterate($str) {
  */
 function formaterVille(string $ville) : string {
 
-    $new_ville = mb_strtolower($ville,'UTF-8');
-    $new_ville = transliterate($new_ville);
-    $new_ville = str_replace(' ','-',$new_ville);
-    $new_ville = preg_replace('/\s+/',' ',trim($new_ville));
-    $new_ville = mb_convert_case($new_ville,MB_CASE_TITLE,'UTF-8');
+    $new_ville = strtolower($ville);
+    $accents = [
+        'à' => 'a', 'á' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a', 'å' => 'a',
+        'è' => 'e', 'é' => 'e', 'ê' => 'e', 'ë' => 'e',
+        'ì' => 'i', 'í' => 'i', 'î' => 'i', 'ï' => 'i',
+        'ò' => 'o', 'ó' => 'o', 'ô' => 'o', 'õ' => 'o', 'ö' => 'o',
+        'ù' => 'u', 'ú' => 'u', 'û' => 'u', 'ü' => 'u',
+        'ç' => 'c', 'ñ' => 'n'
+    ];
+    $new_ville = strtr($new_ville, $accents);
+    $new_ville = str_replace(' ', '-', $new_ville);
+    $new_ville = preg_replace('/\s+/', ' ', trim($new_ville));
+    $new_ville = ucwords($new_ville, '-');
     return $new_ville;
 }
 
