@@ -319,17 +319,17 @@ header .bouton_connexion {
 
 .bar_de_recherche {
     background: rgba(255, 255, 255, 0.95);
-    width: 90%;
+    width: 100%;
     max-width: 1000px;
     backdrop-filter: blur(10px);
     border-radius: var(--radius-xl);
-    padding: var(--spacing-lg) 30px;
-    box-shadow: var(--shadow-medium);
+    padding: var(--spacing-lg) var(--spacing-md);  
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-sm);
     flex-wrap: wrap;
+    box-sizing: border-box;
 }
 
 .bar_de_recherche form {
@@ -339,6 +339,7 @@ header .bouton_connexion {
     gap: var(--spacing-md);
     flex-wrap: wrap;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .search-block {
@@ -349,8 +350,10 @@ header .bouton_connexion {
     border-radius: var(--radius-large);
     padding: var(--spacing-sm) var(--spacing-md);
     flex: 1 1 180px;
-    min-width: 180px;
+    min-width: 150px;
+    max-width: 100%;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-sizing: border-box;
 }
 
 .search-block img {
@@ -374,6 +377,9 @@ header .bouton_connexion {
     font-size: 14px;
     padding: 5px 3px;
     font-family: var(--font-family);
+    min-width: 0; 
+    width: 100%; 
+    box-sizing: border-box;
 }
 
 .bouton_recherche {
@@ -2056,13 +2062,15 @@ footer .logo img {
         flex-direction: column;
         padding: var(--spacing-sm) var(--spacing-md);
         border-radius: var(--radius-medium);
+        width: calc(100% - 20px);
+        margin: 0 10px; 
     }
     
     .search-block {
-        min-width: unset;
-        flex: 1 1 auto;
+        min-width: 120px;
+        flex: 1 1 120px;
         gap: 5px;
-        padding: 6px 10px;
+        padding: 6px 8px;
     }
     
     .search-block label {
@@ -2072,12 +2080,14 @@ footer .logo img {
     .search-block input {
         font-size: 16px;
         padding: 4px 2px;
+        min-width: 0;
     }
     
     .bouton_recherche {
         font-size: 13px;
         padding: 8px 15px;
         border-radius: var(--radius-large);
+        min-width: 80px;
     }
     
     /* Information mobile */
@@ -2295,6 +2305,27 @@ footer .logo img {
 }
 
 @media (max-width: 480px) {
+
+    .bar_de_recherche {
+        width: calc(100% - 10px);
+        padding: var(--spacing-xs) var(--spacing-xs);
+        margin: 0 5px;
+    }
+    
+    .search-block {
+        min-width: 100px;
+        padding: 4px 6px;
+    }
+    
+    .search-block input {
+        padding: 3px 1px;
+    }
+    
+    .bouton_recherche {
+        padding: 6px 10px;
+        font-size: 12px;
+        min-width: 70px;
+    }
     .hero h1 {
         font-size: 1.8rem;
     }
