@@ -15,14 +15,14 @@ function transliterate($str) {
 }
 
 
-
 /** Formate les noms de villes pour la recherche et linsertion
  * @param string le nom de la ville a formater
  * @return string le nom de la ville formater
  */
 function formaterVille(string $ville) : string {
 
-    $new_ville = strtolower($ville);
+    $new_ville = trim($ville);
+    $new_ville = preg_replace('/\s+/', ' ', trim($new_ville));
     $accents = [
         'à' => 'a', 'á' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a', 'å' => 'a',
         'è' => 'e', 'é' => 'e', 'ê' => 'e', 'ë' => 'e',
@@ -31,9 +31,9 @@ function formaterVille(string $ville) : string {
         'ù' => 'u', 'ú' => 'u', 'û' => 'u', 'ü' => 'u',
         'ç' => 'c', 'ñ' => 'n'
     ];
-    $new_ville = strtr($new_ville, $accents);
+    $new_ville = strtr(strtolower($new_ville), $accents);
     $new_ville = str_replace(' ', '-', $new_ville);
-    $new_ville = preg_replace('/\s+/', ' ', trim($new_ville));
+    
     $new_ville = ucwords($new_ville, '-');
     return $new_ville;
 }
