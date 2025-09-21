@@ -787,6 +787,7 @@ class Covoiturage {
     public static function demarrerCovoiturage (PDO $pdo, int $id_conducteur, int $id_covoiturage): array {
         try{
             //VERIFICATION QUE LE JOUR POUR DEMARRER EST CORRECT
+
                 $prep_demarrage_covoit = $pdo->prepare(
                     "SELECT date_depart, heure_depart
                     FROM covoiturage
@@ -797,10 +798,14 @@ class Covoiturage {
                 if($prep_demarrage_covoit->rowCount()<1){
                     return ['success'=>false, 'message'=>'Covoiturage inexistant'];
                 }
-                $date_demarrage = $prep_demarrage_covoit->fetch(PDO::FETCH_ASSOC);
 
-                $depart_covoit = new DateTime($date_demarrage['date_depart'].' '.$date_demarrage['heure_depart']);                
-                $maintenant = new DateTime();
+
+                // Forcer le fuseau horaire français
+                date_default_timezone_set('Europe/Paris');
+                $date_demarrage = $prep_demarrage_covoit->fetch(PDO::FETCH_ASSOC);
+                // Créer les DateTime avec le bon fuseau
+                $depart_covoit = new DateTime($date_demarrage['date_depart'].' '.$date_demarrage['heure_depart'], new DateTimeZone('Europe/Paris'));                
+                $maintenant = new DateTime('now', new DateTimeZone('Europe/Paris'));
                 if ($depart_covoit > $maintenant) {
                     return ['success' => false, 'message' => 'Il est trop tôt pour démarrer le covoiturage'];
                 }
