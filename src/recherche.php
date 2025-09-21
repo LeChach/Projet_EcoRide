@@ -222,13 +222,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="actions_covoit">
                                     <span><?=htmlspecialchars($covoit['c_prix_personne'])?>€</span>
                                     <span><?= htmlspecialchars($covoit['c_nb_place_dispo']) ?> Place<?= ($covoit['c_nb_place_dispo'] > 1) ? 's' : '' ?> disponible<?= ($covoit['c_nb_place_dispo'] > 1) ? 's' : '' ?></span>
-                                    <a href="detail.php
-                                        ?id=<?= $covoit['c_id'] ?>
-                                        &lieu_depart=<?=$lieu_depart?>
-                                        &lieu_arrive=<?=$lieu_arrive?>
-                                        &date_depart=<?=$date_depart?>
-                                        &nb_place=<?=$nb_places_voulu_par_le_passager?>
-                                    "class="btn btn-secondary btn-small">Détails</a>
+                                    <a href="detail.php?id=<?= $covoit['c_id'] ?>&lieu_depart=<?= urlencode($lieu_depart) ?>&lieu_arrive=<?= urlencode($lieu_arrive) ?>&date_depart=<?= urlencode($date_depart) ?>&nb_place=<?= $nb_places_voulu_par_le_passager ?>" class="btn btn-secondary btn-small">Détails</a>
                                     <form action="participation_covoit.php" method="POST">
                                         <input type="hidden" name="type_POST" value="affichage_double_participation">
                                         <input type="hidden" name="id_covoiturage" value="<?= $covoit['c_id'] ?>">
