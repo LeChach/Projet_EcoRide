@@ -799,7 +799,7 @@ class Covoiturage {
                 }
                 $date_demarrage = $prep_demarrage_covoit->fetch(PDO::FETCH_ASSOC);
 
-                $depart_covoit = new DateTime($date_demarrage['date_depart'].''.$date_demarrage['heure_depart']);                
+                $depart_covoit = new DateTime($date_demarrage['date_depart'].' '.$date_demarrage['heure_depart']);                
                 $maintenant = new DateTime();
                 if ($depart_covoit > $maintenant) {
                     return ['success' => false, 'message' => 'Il est trop tôt pour démarrer le covoiturage'];
