@@ -171,6 +171,18 @@ class Covoiturage {
             if ($solde_actuel < $prix_total) {
                 return ['success' => false, 'message' => 'Solde insuffisant pour ce covoiturage'];
             }
+
+            //VERIFICATION si le participant n'est pas juste un conducteur
+                $prep_type = $pdo->prepare(
+                    "SELECT type_utilisateur
+                    FROM utilisateur
+                    WHERE id_utilisateur = ?
+                ");
+                $prep_type->execute([$id_utilisateur]);
+                $type_u = $prep_type->fetch(PDO::FETCH_ASSOC)['type_utilisateur'];
+                if ($type_u === 'Conducteur'){
+                    return ['success'=>false, 'message'=>'Vous n\'êtes que conducteur, vous ne pouvez participer a un covoiturage'];
+                }
             
             $pdo->beginTransaction();
 

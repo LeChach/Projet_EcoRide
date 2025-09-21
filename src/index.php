@@ -39,7 +39,7 @@ require_once 'connexion/session.php';
         <div class="info_objectif">
             <div class="txt_obj">
                 <h2>Notre Objectif</h2>
-                <p>Devenir la référence du covoiturage écoresponsable, en offrant une expérience fluide et sécurisée, adaptée aussi bien aux conducteurs qu’aux passagers.                Que vous soyez à la recherche d’un trajet ou prêt à en proposer un, Éco Ride met à votre disposition un outil intuitif, rapide et fiable pour voyager malin… et partager la route tout en protégeant notre avenir. 
+                <p>Devenir la référence du covoiturage éco responsable, en offrant une expérience fluide et sécurisée, adaptée aussi bien aux conducteurs qu’aux passagers.                Que vous soyez à la recherche d’un trajet ou prêt à en proposer un, Éco Ride met à votre disposition un outil intuitif, rapide et fiable pour voyager malin… et partager la route tout en protégeant notre avenir. 
                 </p>
             </div>
             <img src="assets/img/voiture_eco.jpg" alt="image voiture electrique">
