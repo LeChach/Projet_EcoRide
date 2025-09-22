@@ -267,7 +267,7 @@ class Covoiturage {
      * @param int $nb_place_voulu : nombre de place que veux reserver l'utilisateur
      * @return array ['success' => bool, 'message' => string]
      */
-    public static function voirCovoituragePourParticipation(PDO $pdo, int $id_covoiturage, int $id_utilisateur,int $nb_place_voulu){
+    public static function voirCovoituragePourParticipation(PDO $pdo, int $id_covoiturage, int $id_utilisateur,int $nb_place_voulu):array{
         try{
             //Récupération des infos covoiturage
                 $prep_covoit = $pdo->prepare(
@@ -341,7 +341,7 @@ class Covoiturage {
      * @param int $id_covoiturage :  Id de covoiturage 
      * @return array ['utilisateur' => '', 'covoiturage' => '', 'preferences' => '', 'avis' => '']
      */
-    public static function detailCovoiturage(PDO $pdo, int $id_covoit) {
+    public static function detailCovoiturage(PDO $pdo, int $id_covoit):array {
 
         try{
             //PREPARATION POUR RECUPERER LID UTILISATEUR
